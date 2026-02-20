@@ -1,18 +1,17 @@
 import qrcode
 import os
+from flask import request
 from utils.token_generator import create_secure_token
 
-# ✅ Use environment variable, fallback to localhost
-BASE_VERIFY_URL = os.getenv(
-    "BASE_VERIFY_URL",
-    "http://127.0.0.1:5000/verify"
-)
 
 def generate_qr():
 
     token = create_secure_token()
 
-    verify_url = f"{BASE_VERIFY_URL}?token={token}"
+    # ✅ AUTO detect current domain
+    base_url = request.host_url.rstrip("/")
+
+    verify_url = f"{base_url}/verify?token={token}"
 
     folder = "static/qr_codes"
     os.makedirs(folder, exist_ok=True)
