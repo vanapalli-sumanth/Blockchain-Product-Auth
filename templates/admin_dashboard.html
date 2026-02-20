@@ -1042,7 +1042,19 @@ tab.show();
 });
 
 </script>
+<script>
+function confirmAction(url) {
 
+    if (confirm("Are you sure you want to perform this action?")) {
+
+        window.location.href = url;
+
+    }
+
+}
+</script>
+
+{% endblock %}
 {% endif %}
 
 {% endblock %}

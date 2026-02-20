@@ -54,12 +54,15 @@ def google_login():
 
     authorization_endpoint = google_provider_cfg["authorization_endpoint"]
 
+    # dynamic redirect uri
+    redirect_uri = url_for("google_auth", _external=True)
+
     request_uri = requests.Request(
         "GET",
         authorization_endpoint,
         params={
             "client_id": os.getenv("GOOGLE_CLIENT_ID"),
-            "redirect_uri": "http://127.0.0.1:5000/google-auth",
+            "redirect_uri": redirect_uri,
             "scope": "openid email profile",
             "response_type": "code",
         },
@@ -88,7 +91,7 @@ def google_auth():
             "code": code,
             "client_id": os.getenv("GOOGLE_CLIENT_ID"),
             "client_secret": os.getenv("GOOGLE_CLIENT_SECRET"),
-            "redirect_uri": "http://127.0.0.1:5000/google-auth",
+            "redirect_uri": url_for("google_auth", _external=True),
             "grant_type": "authorization_code",
         },
     )
