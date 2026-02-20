@@ -54,8 +54,11 @@ def google_login():
 
     authorization_endpoint = google_provider_cfg["authorization_endpoint"]
 
-    # dynamic redirect uri
-    redirect_uri = url_for("google_auth", _external=True)
+    # FIXED redirect URI
+    if "onrender.com" in request.host:
+        redirect_uri = "https://blockchain-product-auth.onrender.com/google-auth"
+    else:
+        redirect_uri = "http://127.0.0.1:5000/google-auth"
 
     request_uri = requests.Request(
         "GET",
@@ -82,6 +85,12 @@ def google_auth():
 
     token_endpoint = google_provider_cfg["token_endpoint"]
 
+    # ✅ FIX: force correct redirect URI
+    if "onrender.com" in request.host:
+        redirect_uri = "https://blockchain-product-auth.onrender.com/google-auth"
+    else:
+        redirect_uri = "http://127.0.0.1:5000/google-auth"
+
     token_response = requests.post(
         token_endpoint,
         headers={
@@ -91,7 +100,7 @@ def google_auth():
             "code": code,
             "client_id": os.getenv("GOOGLE_CLIENT_ID"),
             "client_secret": os.getenv("GOOGLE_CLIENT_SECRET"),
-            "redirect_uri": url_for("google_auth", _external=True),
+            "redirect_uri": redirect_uri,  # ✅ FIXED HERE
             "grant_type": "authorization_code",
         },
     )
@@ -114,7 +123,7 @@ def google_auth():
 
     user = users_collection.find_one({"email": email})
 
-    # NEW USER → select role
+    # NEW USER
     if not user:
         session["google_name"] = name
         session["google_email"] = email
@@ -123,15 +132,17 @@ def google_auth():
 
         return redirect("/select-role")
 
-
-    # EXISTING USER → login
+    # EXISTING USER
     session["user"] = user["username"]
     session["role"] = user["role"]
-    flash("Login successful", "success")
 
+    flash("Login successful", "success")
 
     if user["role"] == "manufacturer":
         return redirect("/manufacturer/dashboard")
+
+    elif user["role"] == "admin":
+        return redirect("/admin/dashboard")
 
     return redirect("/customer/dashboard")
 
@@ -307,7 +318,29 @@ def manufacturer_dashboard():
         products=products
     )
 
+# ---------- MANUFACTURER DELETE PRODUCT ----------
+@app.route("/manufacturer/delete/<product_id>")
+def manufacturer_delete_product(product_id):
 
+    if not login_required("manufacturer"):
+        abort(403)
+
+    product = products_collection.find_one({
+        "product_id": product_id,
+        "manufacturer": session["user"]
+    })
+
+    if not product:
+        flash("Product not found or unauthorized", "danger")
+        return redirect("/manufacturer/dashboard")
+
+    products_collection.delete_one({
+        "product_id": product_id
+    })
+
+    flash("Product deleted successfully", "success")
+
+    return redirect("/manufacturer/dashboard")
 
 # ---------- ADD PRODUCT ----------
 @app.route("/manufacturer/add-product", methods=["GET", "POST"])

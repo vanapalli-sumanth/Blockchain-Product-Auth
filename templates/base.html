@@ -442,6 +442,34 @@ flashWrapper.style.display="none";
 });
 
 </script>
+<script>
 
+document.addEventListener("DOMContentLoaded", function(){
+
+    const confirmModal =
+        document.getElementById("confirmModal");
+
+    const confirmBtn =
+        document.getElementById("confirmBtn");
+
+    confirmModal.addEventListener(
+        "show.bs.modal",
+        function(event)
+        {
+
+            const button =
+                event.relatedTarget;
+
+            const url =
+                button.getAttribute("data-url");
+
+            confirmBtn.href = url;
+
+        }
+    );
+
+});
+
+</script>
 </body>
 </html>

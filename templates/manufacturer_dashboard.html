@@ -220,11 +220,12 @@ class="btn btn-sm btn-outline-primary me-1">
 </a>
 
 
-<button onclick="confirmAction('/manufacturer/delete/{{ p.product_id }}')"
-class="btn btn-sm btn-outline-danger">
-
+<button
+class="btn btn-sm btn-outline-danger confirm-btn"
+data-url="/manufacturer/delete/{{ p.product_id }}"
+data-bs-toggle="modal"
+data-bs-target="#confirmModal">
 <i class="fa-solid fa-trash"></i>
-
 </button>
 
 </td>

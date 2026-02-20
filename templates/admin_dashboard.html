@@ -291,19 +291,29 @@ Products
 </a>
 
 {% if m.is_active %}
-<button onclick="confirmAction('/admin/block-user/{{ m.username }}')"
-class="btn btn-sm btn-warning">
+<button
+class="btn btn-sm btn-warning confirm-btn"
+data-url="/admin/block-user/{{ m.username }}"
+data-bs-toggle="modal"
+data-bs-target="#confirmModal">
 Block
 </button>
+
 {% else %}
-<button onclick="confirmAction('/admin/unblock-user/{{ m.username }}')"
-class="btn btn-sm btn-success">
+<button
+class="btn btn-sm btn-success confirm-btn"
+data-url="/admin/unblock-user/{{ m.username }}"
+data-bs-toggle="modal"
+data-bs-target="#confirmModal">
 Unblock
 </button>
 {% endif %}
 
-<button onclick="confirmAction('/admin/delete-user/{{ m.username }}')"
-class="btn btn-sm btn-danger">
+<button
+class="btn btn-sm btn-danger confirm-btn"
+data-url="/admin/delete-user/{{ m.username }}"
+data-bs-toggle="modal"
+data-bs-target="#confirmModal">
 Delete
 </button>
 
@@ -421,19 +431,28 @@ Export PDF
 <td class="text-nowrap">
 
 {% if c.is_active %}
-<button onclick="confirmAction('/admin/block-user/{{ c.username }}')"
-class="btn btn-sm btn-warning">
+<button
+class="btn btn-sm btn-warning confirm-btn"
+data-url="/admin/block-user/{{ c.username }}"
+data-bs-toggle="modal"
+data-bs-target="#confirmModal">
 Block
 </button>
 {% else %}
-<button onclick="confirmAction('/admin/unblock-user/{{ c.username }}')"
-class="btn btn-sm btn-success">
-Unblock
+<button
+class="btn btn-sm btn-warning confirm-btn"
+data-url="/admin/block-user/{{ c.username }}"
+data-bs-toggle="modal"
+data-bs-target="#confirmModal">
+Block
 </button>
 {% endif %}
 
-<button onclick="confirmAction('/admin/delete-user/{{ c.username }}')"
-class="btn btn-sm btn-danger">
+<button
+class="btn btn-sm btn-danger confirm-btn"
+data-url="/admin/delete-user/{{ c.username }}"
+data-bs-toggle="modal"
+data-bs-target="#confirmModal">
 Delete
 </button>
 
@@ -593,19 +612,28 @@ Show All Products
 <td class="text-nowrap">
 
 {% if p.is_active %}
-<button onclick="confirmAction('/admin/block-product/{{ p.product_id }}')"
-class="btn btn-sm btn-warning">
+<button
+class="btn btn-sm btn-warning confirm-btn"
+data-url="/admin/block-product/{{ p.product_id }}"
+data-bs-toggle="modal"
+data-bs-target="#confirmModal">
 Block
 </button>
 {% else %}
-<button onclick="confirmAction('/admin/unblock-product/{{ p.product_id }}')"
-class="btn btn-sm btn-success">
+<button
+class="btn btn-sm btn-success confirm-btn"
+data-url="/admin/unblock-product/{{ p.product_id }}"
+data-bs-toggle="modal"
+data-bs-target="#confirmModal">
 Unblock
 </button>
 {% endif %}
 
-<button onclick="confirmAction('/admin/delete-product/{{ p.product_id }}')"
-class="btn btn-sm btn-danger">
+<button
+class="btn btn-sm btn-danger confirm-btn"
+data-url="/admin/delete-product/{{ p.product_id }}"
+data-bs-toggle="modal"
+data-bs-target="#confirmModal">
 Delete
 </button>
 
@@ -1042,17 +1070,9 @@ tab.show();
 });
 
 </script>
-<script>
-function confirmAction(url) {
 
-    if (confirm("Are you sure you want to perform this action?")) {
-
-        window.location.href = url;
-
-    }
-
-}
-</script>
 {% endif %}
+
+
 
 {% endblock %}
