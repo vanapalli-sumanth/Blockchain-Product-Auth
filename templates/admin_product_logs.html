@@ -1,0 +1,334 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Product Logs{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5 mb-5">
+
+
+<!-- ================= BIG BACKGROUND CARD ================= -->
+
+<div class="card border-0 shadow-lg">
+
+<div class="card-body p-4 p-md-5">
+
+
+<!-- ================= HEADER ================= -->
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+
+<div>
+
+<h2 class="fw-bold mb-1" style="color:#0b2a6e;">
+Verification Logs
+</h2>
+
+<p class="text-muted mb-0">
+Monitor blockchain verification activity for this product
+</p>
+
+</div>
+
+
+<div class="mt-3 mt-md-0">
+
+<a href="/admin/export-product-logs-excel/{{ product.product_id }}"
+class="btn btn-success me-2">
+
+<i class="fa-solid fa-file-excel me-1"></i>
+Export Excel
+
+</a>
+
+
+<a href="/admin/export-product-logs-pdf/{{ product.product_id }}"
+class="btn btn-danger">
+
+<i class="fa-solid fa-file-pdf me-1"></i>
+Export PDF
+
+</a>
+
+</div>
+
+</div>
+
+
+
+<!-- ================= PRODUCT INFO ================= -->
+
+<div class="card border-0 shadow-sm mb-4">
+
+<div class="card-body">
+
+<div class="row">
+
+<div class="col-md-4 mb-2">
+
+<div class="fw-semibold text-muted">
+Product ID
+</div>
+
+<div class="fw-bold">
+{{ product.product_id }}
+</div>
+
+</div>
+
+
+<div class="col-md-4 mb-2">
+
+<div class="fw-semibold text-muted">
+Product Name
+</div>
+
+<div class="fw-bold">
+{{ product.name }}
+</div>
+
+</div>
+
+
+<div class="col-md-4 mb-2">
+
+<div class="fw-semibold text-muted">
+Blockchain Hash
+</div>
+
+<div style="word-break:break-word;font-size:14px;">
+{{ product.tx_hash }}
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- ================= SEARCH + FILTER ================= -->
+
+<div class="card border-0 shadow-sm mb-4">
+
+<div class="card-body">
+
+<div class="row g-3">
+
+<div class="col-md-6">
+
+<label class="form-label fw-semibold">
+Search Logs
+</label>
+
+<input type="text"
+id="searchInput"
+class="form-control"
+placeholder="Search Product ID or Username">
+
+</div>
+
+
+<div class="col-md-3">
+
+<label class="form-label fw-semibold">
+Filter by Status
+</label>
+
+<select id="statusFilter"
+class="form-control">
+
+<option value="">All Status</option>
+<option value="genuine">Genuine</option>
+<option value="fake">Fake</option>
+
+</select>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- ================= LOG TABLE ================= -->
+
+<div class="card border-0 shadow-sm">
+
+<div class="card-body p-0">
+
+<div class="table-responsive">
+
+<table class="table table-hover align-middle mb-0">
+
+<thead style="background:#0b2a6e;color:white;">
+
+<tr>
+
+<th class="ps-3">Product ID</th>
+
+<th>Username</th>
+
+<th style="min-width:200px;">
+Original Blockchain Hash
+</th>
+
+<th style="min-width:200px;">
+Scanned Blockchain Hash
+</th>
+
+<th>Status</th>
+
+<th class="pe-3">Date (IST)</th>
+
+</tr>
+
+</thead>
+
+
+<tbody id="logTable">
+
+{% for log in logs %}
+
+<tr>
+
+<td class="ps-3 fw-semibold">
+{{ log.scanned_product_id }}
+</td>
+
+<td>
+{{ log.username }}
+</td>
+
+
+<td style="word-break:break-word;font-size:14px;">
+{{ log.original_blockchain_tx_hash }}
+</td>
+
+
+<td style="word-break:break-word;font-size:14px;">
+{{ log.scanned_tx_hash }}
+</td>
+
+
+<td>
+
+{% if log.status == "genuine" %}
+
+<span class="badge bg-success px-3 py-2">
+<i class="fa-solid fa-check me-1"></i>
+Genuine
+</span>
+
+{% else %}
+
+<span class="badge bg-danger px-3 py-2">
+<i class="fa-solid fa-xmark me-1"></i>
+Fake
+</span>
+
+{% endif %}
+
+</td>
+
+
+<td class="pe-3" style="font-size:14px;">
+
+{{ log.ist_date.strftime("%d %b %Y %I:%M %p") if log.ist_date }}
+
+</td>
+
+</tr>
+
+
+{% else %}
+
+<tr>
+
+<td colspan="6"
+class="text-center py-4 text-muted">
+
+<i class="fa-solid fa-circle-info me-1"></i>
+No verification logs found
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+
+</div>
+</div>
+</div>
+
+
+
+<!-- ================= SEARCH SCRIPT ================= -->
+
+<script>
+
+const searchInput =
+document.getElementById("searchInput")
+
+const statusFilter =
+document.getElementById("statusFilter")
+
+
+searchInput.addEventListener("keyup", filterLogs)
+
+statusFilter.addEventListener("change", filterLogs)
+
+
+function filterLogs(){
+
+let search =
+searchInput.value.toLowerCase()
+
+let status =
+statusFilter.value.toLowerCase()
+
+let rows =
+document.querySelectorAll("#logTable tr")
+
+
+rows.forEach(row=>{
+
+let text =
+row.innerText.toLowerCase()
+
+let searchMatch =
+text.includes(search)
+
+let statusMatch =
+status=="" || text.includes(status)
+
+
+row.style.display =
+(searchMatch && statusMatch)
+? ""
+: "none"
+
+})
+
+}
+
+</script>
+
+{% endblock %}

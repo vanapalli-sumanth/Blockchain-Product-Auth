@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+
+{% block title %}Customer Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5 mb-5">
+
+
+<!-- ================= BIG BACKGROUND CARD ================= -->
+
+<div class="card border-0 shadow-lg">
+
+<div class="card-body p-4 p-md-5">
+
+
+<!-- ================= HEADER ================= -->
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+
+<div>
+
+<h2 class="fw-bold mb-1" style="color:#0b2a6e;">
+Customer Dashboard
+</h2>
+
+<p class="text-muted mb-0">
+View and manage your product verification history
+</p>
+
+</div>
+
+
+<div class="mt-3 mt-md-0">
+
+<a href="/customer/export-logs-excel"
+class="btn btn-success me-2">
+
+<i class="fa-solid fa-file-excel me-1"></i>
+Export Excel
+
+</a>
+
+
+<a href="/customer/export-logs-pdf"
+class="btn btn-danger me-2">
+
+<i class="fa-solid fa-file-pdf me-1"></i>
+Export PDF
+
+</a>
+
+
+<a href="/verify"
+class="btn btn-dark">
+
+<i class="fa-solid fa-qrcode me-1"></i>
+Scan Product
+
+</a>
+
+</div>
+
+</div>
+
+
+
+<!-- ================= SEARCH + FILTER ================= -->
+
+<div class="card border-0 shadow-sm mb-4">
+
+<div class="card-body">
+
+<div class="row g-3">
+
+<div class="col-md-6">
+
+<label class="form-label fw-semibold">
+Search Verification History
+</label>
+
+<input type="text"
+id="searchInput"
+class="form-control"
+placeholder="Search product or manufacturer">
+
+</div>
+
+
+<div class="col-md-3">
+
+<label class="form-label fw-semibold">
+Filter by Status
+</label>
+
+<select id="statusFilter"
+class="form-control">
+
+<option value="">All Status</option>
+<option value="Genuine">Genuine</option>
+<option value="Fake">Fake</option>
+
+</select>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- ================= TABLE ================= -->
+
+<div class="card border-0 shadow-sm">
+
+<div class="card-body p-0">
+
+<div class="table-responsive">
+
+<table class="table table-hover align-middle mb-0" id="logTable">
+
+<thead style="background:#0b2a6e;color:white;">
+
+<tr>
+
+<th class="ps-3">Product ID</th>
+
+<th>Manufacturer</th>
+
+<th>Status</th>
+
+<th class="pe-3">Date (IST)</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for log in logs %}
+
+<tr>
+
+<td class="ps-3 fw-semibold">
+{{ log.scanned_product_id }}
+</td>
+
+
+<td>
+{{ log.manufacturer }}
+</td>
+
+
+<td>
+
+{% if log.status == "genuine" %}
+
+<span class="badge bg-success px-3 py-2">
+<i class="fa-solid fa-check me-1"></i>
+Genuine
+</span>
+
+{% else %}
+
+<span class="badge bg-danger px-3 py-2">
+<i class="fa-solid fa-xmark me-1"></i>
+Fake
+</span>
+
+{% endif %}
+
+</td>
+
+
+<td class="pe-3" style="font-size:14px;">
+{{ log.ist_date.strftime("%d %b %Y %I:%M %p") }}
+</td>
+
+</tr>
+
+
+{% else %}
+
+<tr>
+
+<td colspan="4"
+class="text-center py-4 text-muted">
+
+<i class="fa-solid fa-circle-info me-1"></i>
+No verification history yet
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+
+</div>
+</div>
+
+</div>
+
+
+
+<!-- ================= SEARCH SCRIPT ================= -->
+
+<script>
+
+const searchInput =
+document.getElementById("searchInput")
+
+const statusFilter =
+document.getElementById("statusFilter")
+
+searchInput.addEventListener("keyup", filterTable)
+statusFilter.addEventListener("change", filterTable)
+
+function filterTable(){
+
+let search =
+searchInput.value.toLowerCase()
+
+let status =
+statusFilter.value.toLowerCase()
+
+let rows =
+document.querySelectorAll("#logTable tbody tr")
+
+rows.forEach(row=>{
+
+let text =
+row.innerText.toLowerCase()
+
+let matchesSearch =
+text.includes(search)
+
+let matchesStatus =
+status=="" || text.includes(status)
+
+row.style.display =
+(matchesSearch && matchesStatus)
+? ""
+: "none"
+
+})
+
+}
+
+</script>
+
+{% endblock %}

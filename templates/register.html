@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% block title %}Register | BlockAuth{% endblock %}
+
+{% block content %}
+
+<section class="auth-section">
+
+<div class="container">
+
+<div class="row justify-content-center align-items-center">
+
+<div class="col-lg-5 col-md-7">
+
+<div class="auth-card">
+
+<!-- Header -->
+
+<div class="auth-header text-center mb-4">
+
+<h2>Create Account</h2>
+
+<p class="text-muted">
+Join BlockAuth to verify and protect products securely
+</p>
+
+</div>
+
+
+<!-- Form -->
+
+<form method="POST" id="registerForm">
+
+<div class="form-group mb-3">
+
+<label class="form-label">Full Name</label>
+
+<input type="text"
+name="full_name"
+class="form-control"
+placeholder="Enter your full name"
+required>
+
+</div>
+
+
+<div class="form-group mb-3">
+
+<label class="form-label">Username</label>
+
+<input type="text"
+name="username"
+class="form-control"
+placeholder="Choose a username"
+required>
+
+</div>
+
+
+<div class="form-group mb-3">
+
+<label class="form-label">Email Address</label>
+
+<input type="email"
+name="email"
+class="form-control"
+placeholder="Enter your email"
+required>
+
+</div>
+
+
+<div class="form-group mb-3">
+
+<label class="form-label">Account Type</label>
+
+<select name="role"
+class="form-control"
+required>
+
+<option value="">Select role</option>
+<option value="manufacturer">Manufacturer</option>
+<option value="customer">Customer</option>
+
+</select>
+
+</div>
+
+
+<div class="form-group mb-2">
+
+<label class="form-label">Password</label>
+
+<div class="input-group">
+
+<input type="password"
+name="password"
+id="password"
+class="form-control"
+placeholder="Create a password"
+required>
+
+<button type="button"
+class="btn btn-outline-dark"
+onclick="togglePassword()">
+
+<i class="fa-solid fa-eye"></i>
+
+</button>
+
+</div>
+
+</div>
+
+
+<!-- Password strength -->
+
+<div class="progress mb-3 auth-progress">
+
+<div id="passwordStrength"
+class="progress-bar">
+
+</div>
+
+</div>
+
+
+<button class="btn btn-dark w-100 auth-btn">
+
+<i class="fa-solid fa-user-plus me-2"></i>
+Create Account
+
+</button>
+
+</form>
+
+
+<!-- Divider -->
+
+<div class="auth-divider">
+<span>OR</span>
+</div>
+
+
+<!-- Google Button -->
+
+<a href="/google-login"
+class="btn btn-light border w-100 auth-google">
+
+<i class="fa-brands fa-google me-2"></i>
+Continue with Google
+
+</a>
+
+
+<!-- Login Link -->
+
+<p class="auth-footer text-center">
+
+Already have an account?
+<a href="/login">Login</a>
+
+</p>
+
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<script>
+
+const password = document.getElementById("password");
+const bar = document.getElementById("passwordStrength");
+
+password.addEventListener("input", () => {
+
+let strength = password.value.length;
+
+bar.style.width = strength * 10 + "%";
+
+if(strength < 4)
+bar.className = "progress-bar bg-danger";
+
+else if(strength < 7)
+bar.className = "progress-bar bg-warning";
+
+else
+bar.className = "progress-bar bg-success";
+
+});
+
+function togglePassword(){
+
+const input = document.getElementById("password");
+
+input.type =
+input.type === "password" ? "text" : "password";
+
+}
+
+</script>
+
+{% endblock %}

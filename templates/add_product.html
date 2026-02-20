@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block title %}Add Product | BlockAuth{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5 mb-5 pb-5">
+
+
+<div class="row justify-content-center">
+
+<div class="col-md-6 col-lg-5">
+
+
+<!-- CARD -->
+
+<div class="card border-0 shadow-sm">
+
+<div class="card-body p-4">
+
+
+<!-- HEADER -->
+
+<div class="text-center mb-4">
+
+<div class="verify-icon mb-2">
+<i class="fa-solid fa-cube"></i>
+</div>
+
+<h3 class="fw-bold mb-1">
+Add New Product
+</h3>
+
+<p class="text-muted mb-0">
+Register product securely on blockchain
+</p>
+
+</div>
+
+
+
+<!-- FORM -->
+
+<form method="POST">
+
+<div class="mb-3">
+
+<label class="form-label fw-semibold">
+Product Name
+</label>
+
+<input type="text"
+name="name"
+class="form-control"
+placeholder="Enter product name"
+required>
+
+</div>
+
+
+
+<div class="mb-3">
+
+<label class="form-label fw-semibold">
+Product ID (Optional)
+</label>
+
+<input type="text"
+name="product_id"
+class="form-control"
+placeholder="Leave empty to auto-generate">
+
+<div class="form-text">
+Secure blockchain ID will be generated automatically
+</div>
+
+</div>
+
+
+
+<!-- BUTTONS -->
+
+<div class="d-flex gap-2 mt-4">
+
+<button id="submitBtn"
+class="btn btn-dark w-100">
+
+<span id="btnText">
+
+<i class="fa-solid fa-shield-halved me-1"></i>
+Create Product
+
+</span>
+
+<span id="btnSpinner"
+class="spinner-border spinner-border-sm ms-2 d-none">
+
+</span>
+
+</button>
+
+
+
+<a href="/manufacturer/dashboard"
+class="btn btn-outline-dark w-100">
+
+<i class="fa-solid fa-arrow-left me-1"></i>
+Cancel
+
+</a>
+
+</div>
+
+</form>
+
+
+</div>
+</div>
+
+
+</div>
+</div>
+
+</div>
+
+
+
+<script>
+
+document.querySelector("form").addEventListener("submit", function() {
+
+    const btn = document.getElementById("submitBtn")
+    const text = document.getElementById("btnText")
+    const spinner = document.getElementById("btnSpinner")
+
+    btn.disabled = true
+
+    text.innerHTML =
+    `<i class="fa-solid fa-link me-1"></i>
+    Adding to Blockchain...`
+
+    spinner.classList.remove("d-none")
+
+})
+
+</script>
+
+
+{% endblock %}

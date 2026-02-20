@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}Home | BlockAuth{% endblock %}
+
+{% block content %}
+
+<section class="hero-section">
+
+<div class="container">
+
+<div class="row justify-content-center">
+
+<div class="col-lg-8 text-center">
+
+<h1 class="hero-title">
+Authenticate Products.<br>
+Eliminate Counterfeits.
+</h1>
+
+<p class="hero-text mt-3">
+A blockchain-based system to verify product authenticity using
+QR codes and secure cloud database technology.
+</p>
+
+<div class="mt-4">
+
+<a href="#"
+onclick="handleVerifyClick()"
+class="btn btn-dark btn-lg me-2">
+
+Verify Product
+
+</a>
+
+<a href="/register"
+class="btn btn-outline-dark btn-lg">
+
+Get Started
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+
+<section class="features-section">
+
+<div class="container">
+
+<h2 class="section-title text-center">
+Why Choose BlockAuth?
+</h2>
+
+<div class="row mt-5">
+
+
+<div class="col-md-4">
+
+<div class="feature-card">
+
+<div class="feature-icon">🔐</div>
+
+<h5>Blockchain Security</h5>
+
+<p>
+Tamper-proof authentication using blockchain technology.
+</p>
+
+</div>
+
+</div>
+
+
+<div class="col-md-4">
+
+<div class="feature-card">
+
+<div class="feature-icon">📱</div>
+
+<h5>QR Verification</h5>
+
+<p>
+Verify products instantly using QR codes.
+</p>
+
+</div>
+
+</div>
+
+
+<div class="col-md-4">
+
+<div class="feature-card">
+
+<div class="feature-icon">☁️</div>
+
+<h5>Cloud Database</h5>
+
+<p>
+Secure MongoDB Atlas cloud storage integration.
+</p>
+
+</div>
+
+</div>
+
+
+<div class="col-md-4">
+
+<div class="feature-card">
+
+<div class="feature-icon">⚡</div>
+
+<h5>Fast Verification</h5>
+
+<p>
+Instant authentication in milliseconds.
+</p>
+
+</div>
+
+</div>
+
+
+<div class="col-md-4">
+
+<div class="feature-card">
+
+<div class="feature-icon">🛡️</div>
+
+<h5>Anti-Counterfeit</h5>
+
+<p>
+Protect customers from fake products.
+</p>
+
+</div>
+
+</div>
+
+
+<div class="col-md-4">
+
+<div class="feature-card">
+
+<div class="feature-icon">🌐</div>
+
+<h5>Global Access</h5>
+
+<p>
+Verify products from anywhere securely.
+</p>
+
+</div>
+
+</div>
+
+
+</div>
+
+</div>
+
+</section>
+
+
+
+<section class="cta-section">
+
+<div class="container text-center">
+
+<h2 class="text-white">
+Ready to Secure Your Products?
+</h2>
+
+<p class="mt-2">
+Join manufacturers and customers in fighting counterfeit products.
+</p>
+
+<a href="/register"
+class="btn btn-light btn-lg mt-3">
+
+Start Now
+
+</a>
+
+</div>
+
+</section>
+
+{% endblock %}

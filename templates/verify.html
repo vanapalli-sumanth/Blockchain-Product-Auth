@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% block title %}Verify Product | BlockAuth{% endblock %}
+
+{% block content %}
+
+<section class="verify-section">
+
+<div class="container">
+
+<div class="row justify-content-center">
+
+<div class="col-lg-5 col-md-7">
+
+<div class="verify-card">
+
+{% if stage == "scan" %}
+
+<!-- HEADER -->
+
+<div class="verify-header text-center">
+
+<div class="verify-icon">
+<i class="fa-solid fa-qrcode"></i>
+</div>
+
+<h3>Scan Product QR Code</h3>
+
+<p class="text-muted">
+Align the QR code within the frame to verify authenticity
+</p>
+
+</div>
+
+
+<!-- QR SCANNER BOX -->
+
+<div id="qr-reader" class="qr-box"></div>
+
+
+<!-- BLOCKCHAIN LOADER -->
+
+<div id="verification-loading"
+class="verification-loader d-none">
+
+<div class="spinner-border text-primary"></div>
+
+<h5 class="mt-3">
+Verifying on Blockchain...
+</h5>
+
+<p class="text-muted small">
+Checking secure authenticity records
+</p>
+
+</div>
+
+
+{% elif stage == "result" %}
+
+
+<!-- RESULT SECTION -->
+
+<div class="text-center">
+
+{% if status == "genuine" %}
+
+<div class="result-icon success">
+<i class="fa-solid fa-circle-check"></i>
+</div>
+
+<h4 class="text-success">
+Genuine Product
+</h4>
+
+<div class="result-box">
+
+<div class="result-row">
+<span>Product ID</span>
+<span>{{ product.product_id }}</span>
+</div>
+
+<div class="result-row">
+<span>Manufacturer</span>
+<span>{{ product.manufacturer }}</span>
+</div>
+
+</div>
+
+{% else %}
+
+<div class="result-icon danger">
+<i class="fa-solid fa-circle-xmark"></i>
+</div>
+
+<h4 class="text-danger">
+Fake Product Detected
+</h4>
+
+<p class="text-muted">
+This product is not registered on blockchain
+</p>
+
+{% endif %}
+
+
+<a href="/verify"
+class="btn btn-dark w-100 mt-4">
+
+<i class="fa-solid fa-rotate-right me-2"></i>
+Scan Another Product
+
+</a>
+
+</div>
+
+
+{% endif %}
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+
+{% if stage == "scan" %}
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+<script>
+
+const scanner = new Html5Qrcode("qr-reader");
+
+scanner.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: 250 },
+    (decodedText) => {
+
+        scanner.stop().then(() => {
+
+            document.getElementById("qr-reader").style.display = "none";
+
+            document.getElementById("verification-loading")
+                .classList.remove("d-none");
+
+            setTimeout(() => {
+
+                window.location.href = decodedText;
+
+            }, 1200);
+
+        });
+
+    }
+);
+
+</script>
+
+{% endif %}
+
+{% endblock %}

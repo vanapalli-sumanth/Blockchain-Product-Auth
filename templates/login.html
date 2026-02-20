@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}Login | BlockAuth{% endblock %}
+
+{% block content %}
+
+<section class="auth-section">
+
+<div class="container">
+
+<div class="row justify-content-center align-items-center">
+
+<div class="col-lg-5 col-md-7">
+
+<div class="auth-card">
+
+<!-- Header -->
+
+<div class="auth-header text-center mb-4">
+
+<h2>Welcome Back</h2>
+
+<p class="text-muted">
+Login to verify and manage authenticated products
+</p>
+
+</div>
+
+
+<!-- Login Form -->
+
+<form method="POST">
+
+<!-- Email -->
+
+<div class="form-group mb-3">
+
+<label class="form-label">Email Address</label>
+
+<input type="email"
+name="email"
+class="form-control"
+placeholder="Enter your email"
+required>
+
+</div>
+
+
+<!-- Password -->
+
+<div class="form-group mb-3">
+
+<label class="form-label">Password</label>
+
+<div class="input-group">
+
+<input type="password"
+name="password"
+id="password"
+class="form-control"
+placeholder="Enter your password"
+required>
+
+<button type="button"
+class="btn btn-outline-dark"
+onclick="togglePassword()">
+
+<i class="fa-solid fa-eye"></i>
+
+</button>
+
+</div>
+
+</div>
+
+
+<!-- Login Button -->
+
+<button class="btn btn-dark w-100 auth-btn">
+
+<i class="fa-solid fa-right-to-bracket me-2"></i>
+Login
+
+</button>
+
+</form>
+
+
+<!-- Divider -->
+
+<div class="auth-divider">
+
+<span>OR</span>
+
+</div>
+
+
+<!-- Google Login -->
+
+<a href="/google-login"
+class="btn btn-light border w-100 auth-google">
+
+<i class="fa-brands fa-google me-2"></i>
+Continue with Google
+
+</a>
+
+
+<!-- Footer -->
+
+<p class="auth-footer text-center">
+
+Don't have an account?
+<a href="/register">Create Account</a>
+
+</p>
+
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<script>
+
+function togglePassword(){
+
+const input = document.getElementById("password");
+
+input.type =
+input.type === "password" ? "text" : "password";
+
+}
+
+</script>
+
+{% endblock %}

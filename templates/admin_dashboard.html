@@ -1,0 +1,1048 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard | BlockAuth{% endblock %}
+
+{% block content %}
+<style>
+
+/* Mobile responsive tabs */
+.mobile-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.mobile-tabs .nav-link {
+    white-space: nowrap;
+}
+
+/* Optional: smooth scroll */
+.mobile-tabs::-webkit-scrollbar {
+    height: 4px;
+}
+
+.mobile-tabs::-webkit-scrollbar-thumb {
+    background: #0b2a6e;
+    border-radius: 10px;
+}
+
+</style>
+
+<div class="container mt-5 mb-5">
+
+
+<!-- ================= BIG BACKGROUND CARD ================= -->
+
+<div class="card border-0 shadow-lg">
+
+<div class="card-body p-4 p-md-5">
+
+
+<!-- ================= HEADER ================= -->
+
+<div class="mb-4">
+
+<h2 class="fw-bold mb-1" style="color:#0b2a6e;">
+Admin Dashboard
+</h2>
+
+<p class="text-muted mb-0">
+Monitor users, products, blockchain verification, and system analytics
+</p>
+
+</div>
+
+
+
+<!-- ================= STATISTICS CARDS ================= -->
+
+<div class="row mb-4">
+
+<div class="col-md-3 mb-3">
+<div class="card border-0 shadow-sm text-center h-100">
+<div class="card-body">
+
+<i class="fa-solid fa-industry fa-2x mb-2 text-primary"></i>
+
+<h6 class="text-muted">Manufacturers</h6>
+
+<h3 class="fw-bold text-primary">
+{{ manufacturers|length }}
+</h3>
+
+</div>
+</div>
+</div>
+
+
+<div class="col-md-3 mb-3">
+<div class="card border-0 shadow-sm text-center h-100">
+<div class="card-body">
+
+<i class="fa-solid fa-users fa-2x mb-2 text-success"></i>
+
+<h6 class="text-muted">Customers</h6>
+
+<h3 class="fw-bold text-success">
+{{ customers|length }}
+</h3>
+
+</div>
+</div>
+</div>
+
+
+<div class="col-md-3 mb-3">
+<div class="card border-0 shadow-sm text-center h-100">
+<div class="card-body">
+
+<i class="fa-solid fa-box fa-2x mb-2" style="color:#0b2a6e;"></i>
+
+<h6 class="text-muted">Products</h6>
+
+<h3 class="fw-bold">
+{{ products|length }}
+</h3>
+
+</div>
+</div>
+</div>
+
+
+<div class="col-md-3 mb-3">
+<div class="card border-0 shadow-sm text-center h-100">
+<div class="card-body">
+
+<i class="fa-solid fa-triangle-exclamation fa-2x mb-2 text-danger"></i>
+
+<h6 class="text-muted">Fake Detection Rate</h6>
+
+{% set fake_count = logs | selectattr("status","equalto","fake") | list | length %}
+{% set total_logs = logs | length %}
+
+{% if total_logs > 0 %}
+<h3 class="fw-bold text-danger">
+{{ ((fake_count / total_logs) * 100) | round(1) }}%
+</h3>
+{% else %}
+<h3 class="fw-bold">0%</h3>
+{% endif %}
+
+</div>
+</div>
+</div>
+
+</div>
+
+
+
+<!-- ================= NAV TABS ================= -->
+
+<ul class="nav nav-tabs mb-4 flex-nowrap overflow-auto mobile-tabs">
+
+<li class="nav-item">
+<button class="nav-link active fw-semibold"
+data-bs-toggle="tab"
+data-bs-target="#manufacturers">
+
+<i class="fa-solid fa-industry me-1"></i>
+Manufacturers
+
+</button>
+</li>
+
+<li class="nav-item">
+<button class="nav-link fw-semibold"
+data-bs-toggle="tab"
+data-bs-target="#customers">
+
+<i class="fa-solid fa-users me-1"></i>
+Customers
+
+</button>
+</li>
+
+<li class="nav-item">
+<button class="nav-link fw-semibold"
+data-bs-toggle="tab"
+data-bs-target="#products">
+
+<i class="fa-solid fa-box me-1"></i>
+Products
+
+</button>
+</li>
+
+<li class="nav-item">
+<button class="nav-link fw-semibold"
+data-bs-toggle="tab"
+data-bs-target="#logs">
+
+<i class="fa-solid fa-clock-rotate-left me-1"></i>
+Verification Logs
+
+</button>
+</li>
+
+</ul>
+
+<div class="tab-content">
+
+<!-- ================= MANUFACTURERS ================= -->
+
+<div class="tab-pane fade show active" id="manufacturers">
+
+<!-- Responsive Header -->
+<div class="row g-2 mb-3 align-items-center">
+
+<!-- Search -->
+<div class="col-12 col-md-5">
+<input type="text"
+id="manufacturerSearch"
+class="form-control"
+placeholder="Search manufacturers...">
+</div>
+
+<!-- Filter -->
+<div class="col-12 col-md-3">
+<select id="manufacturerFilter"
+class="form-select">
+
+<option value="">All Status</option>
+<option value="Active">Active</option>
+<option value="Blocked">Blocked</option>
+
+</select>
+</div>
+
+<!-- Buttons -->
+<div class="col-12 col-md-4">
+
+<div class="d-flex flex-wrap gap-2 justify-content-md-end">
+
+<a href="/admin/export-manufacturers-excel"
+class="btn btn-success">
+Export Excel
+</a>
+
+<a href="/admin/export-manufacturers-pdf"
+class="btn btn-danger">
+Export PDF
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- Responsive Table -->
+<div class="table-responsive">
+
+<table class="table table-bordered table-striped">
+
+<thead class="table-dark">
+
+<tr>
+<th>Username</th>
+<th>Email</th>
+<th>Created At</th>
+<th>Status</th>
+<th>Credibility</th>
+<th>Actions</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for m in manufacturers %}
+
+<tr>
+
+<td>{{ m.username }}</td>
+
+<td>{{ m.email }}</td>
+
+<td>
+{{ m.created_at_ist.strftime("%d %b %Y %I:%M %p") if m.created_at_ist }}
+</td>
+
+<td>
+
+{% if m.is_active %}
+<span class="badge bg-success">Active</span>
+{% else %}
+<span class="badge bg-danger">Blocked</span>
+{% endif %}
+
+</td>
+
+<td>
+<span class="badge bg-info">
+{{ m.credibility_score | default(100) }}%
+</span>
+</td>
+
+<td class="text-nowrap">
+
+<a href="/admin/manufacturer-products/{{ m.username }}"
+class="btn btn-sm btn-info">
+Products
+</a>
+
+{% if m.is_active %}
+<button onclick="confirmAction('/admin/block-user/{{ m.username }}')"
+class="btn btn-sm btn-warning">
+Block
+</button>
+{% else %}
+<button onclick="confirmAction('/admin/unblock-user/{{ m.username }}')"
+class="btn btn-sm btn-success">
+Unblock
+</button>
+{% endif %}
+
+<button onclick="confirmAction('/admin/delete-user/{{ m.username }}')"
+class="btn btn-sm btn-danger">
+Delete
+</button>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+<!-- ================= CUSTOMERS ================= -->
+
+<div class="tab-pane fade" id="customers">
+
+<!-- Responsive Header -->
+<div class="row g-2 mb-3 align-items-center">
+
+<!-- Search -->
+<div class="col-12 col-md-5">
+<input type="text"
+id="customerSearch"
+class="form-control"
+placeholder="Search customers...">
+</div>
+
+<!-- Filter -->
+<div class="col-12 col-md-3">
+<select id="customerFilter"
+class="form-select">
+
+<option value="">All Status</option>
+<option value="Active">Active</option>
+<option value="Blocked">Blocked</option>
+
+</select>
+</div>
+
+<!-- Buttons -->
+<div class="col-12 col-md-4">
+
+<div class="d-flex flex-wrap gap-2 justify-content-md-end">
+
+<a href="/admin/export-customers-excel"
+class="btn btn-success">
+Export Excel
+</a>
+
+<a href="/admin/export-customers-pdf"
+class="btn btn-danger">
+Export PDF
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- Responsive Table -->
+<div class="table-responsive">
+
+<table class="table table-bordered table-striped">
+
+<thead class="table-dark">
+
+<tr>
+<th>Username</th>
+<th>Email</th>
+<th>Created At</th>
+<th>Status</th>
+<th>Credibility</th>
+<th>Actions</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for c in customers %}
+
+<tr>
+
+<td>{{ c.username }}</td>
+
+<td>{{ c.email }}</td>
+
+<td>
+{{ c.created_at_ist.strftime("%d %b %Y %I:%M %p") if c.created_at_ist }}
+</td>
+
+<td>
+
+{% if c.is_active %}
+<span class="badge bg-success">Active</span>
+{% else %}
+<span class="badge bg-danger">Blocked</span>
+{% endif %}
+
+</td>
+
+<td>
+
+<span class="badge bg-info">
+{{ c.credibility_score | default(100) }}%
+</span>
+
+</td>
+
+<td class="text-nowrap">
+
+{% if c.is_active %}
+<button onclick="confirmAction('/admin/block-user/{{ c.username }}')"
+class="btn btn-sm btn-warning">
+Block
+</button>
+{% else %}
+<button onclick="confirmAction('/admin/unblock-user/{{ c.username }}')"
+class="btn btn-sm btn-success">
+Unblock
+</button>
+{% endif %}
+
+<button onclick="confirmAction('/admin/delete-user/{{ c.username }}')"
+class="btn btn-sm btn-danger">
+Delete
+</button>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+<!-- ================= PRODUCTS ================= -->
+
+<!-- ================= PRODUCTS ================= -->
+
+<div class="tab-pane fade" id="products">
+
+<!-- Responsive Header -->
+<div class="row g-2 mb-3 align-items-center">
+
+<!-- Search -->
+<div class="col-12 col-md-5">
+<input type="text"
+id="productSearch"
+class="form-control"
+placeholder="Search products...">
+</div>
+
+<!-- Filter -->
+<div class="col-12 col-md-3">
+<select id="productFilter"
+class="form-select">
+
+<option value="">All Status</option>
+<option value="Active">Active</option>
+<option value="Blocked">Blocked</option>
+
+</select>
+</div>
+
+<!-- Buttons -->
+<div class="col-12 col-md-4">
+
+<div class="d-flex flex-wrap gap-2 justify-content-md-end">
+
+<a href="/admin/export-products-excel"
+class="btn btn-success">
+Export Excel
+</a>
+
+<a href="/admin/export-products-pdf"
+class="btn btn-danger">
+Export PDF
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- Filter Info Message -->
+{% if selected_manufacturer %}
+
+<div class="alert alert-info d-flex flex-wrap justify-content-between align-items-center gap-2">
+
+<div>
+Showing products of manufacturer:
+<strong>{{ selected_manufacturer }}</strong>
+</div>
+
+<a href="/admin/dashboard"
+class="btn btn-sm btn-dark">
+Show All Products
+</a>
+
+</div>
+
+{% endif %}
+
+
+<!-- Responsive Table -->
+<div class="table-responsive">
+
+<table class="table table-bordered table-striped">
+
+<thead class="table-dark">
+
+<tr>
+<th>Product ID</th>
+<th>Name</th>
+<th>Manufacturer</th>
+<th>Blockchain Tx Hash</th>
+<th>Added Date</th>
+<th>Status</th>
+<th>Credibility</th>
+<th>Actions</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for p in products %}
+
+<tr>
+
+<td>{{ p.product_id }}</td>
+
+<td>{{ p.name }}</td>
+
+<td>{{ p.manufacturer }}</td>
+
+<td style="max-width:200px;word-break:break-word;">
+{{ p.tx_hash }}
+</td>
+
+<td>
+{{ p.created_at_ist.strftime("%d %b %Y %I:%M %p") if p.created_at_ist }}
+</td>
+
+<td>
+
+{% if p.is_active %}
+<span class="badge bg-success">Active</span>
+{% else %}
+<span class="badge bg-danger">Blocked</span>
+{% endif %}
+
+</td>
+
+<td>
+
+{% set score = p.credibility_score | default(100) %}
+
+{% if score >= 80 %}
+<span class="badge bg-success">{{ score }}%</span>
+
+{% elif score >= 50 %}
+<span class="badge bg-warning">{{ score }}%</span>
+
+{% else %}
+<span class="badge bg-danger">{{ score }}%</span>
+
+{% endif %}
+
+</td>
+
+<td class="text-nowrap">
+
+{% if p.is_active %}
+<button onclick="confirmAction('/admin/block-product/{{ p.product_id }}')"
+class="btn btn-sm btn-warning">
+Block
+</button>
+{% else %}
+<button onclick="confirmAction('/admin/unblock-product/{{ p.product_id }}')"
+class="btn btn-sm btn-success">
+Unblock
+</button>
+{% endif %}
+
+<button onclick="confirmAction('/admin/delete-product/{{ p.product_id }}')"
+class="btn btn-sm btn-danger">
+Delete
+</button>
+
+<a href="/admin/product-logs/{{ p.product_id }}"
+class="btn btn-sm btn-info">
+Logs
+</a>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+<!-- ================= LOGS ================= -->
+
+<div class="tab-pane fade" id="logs">
+
+<!-- Responsive Header -->
+<div class="row g-2 mb-3 align-items-center">
+
+<!-- Search -->
+<div class="col-12 col-md-5">
+<input type="text"
+id="logSearch"
+class="form-control"
+placeholder="Search logs...">
+</div>
+
+<!-- Filter -->
+<div class="col-12 col-md-3">
+<select id="logFilter"
+class="form-select">
+
+<option value="">All Results</option>
+<option value="Genuine">Genuine</option>
+<option value="Fake">Fake</option>
+
+</select>
+</div>
+
+<!-- Buttons -->
+<div class="col-12 col-md-4">
+
+<div class="d-flex flex-wrap gap-2 justify-content-md-end">
+
+<a href="/admin/export-logs-excel"
+class="btn btn-success">
+Export Excel
+</a>
+
+<a href="/admin/export-logs-pdf"
+class="btn btn-danger">
+Export PDF
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- Responsive Table -->
+<div class="table-responsive">
+
+<table class="table table-bordered table-striped">
+
+<thead class="table-dark">
+
+<tr>
+<th>Product ID</th>
+<th>Username</th>
+<th>Original Blockchain Hash</th>
+<th>Scanned Blockchain Hash</th>
+<th>Status</th>
+<th>Date</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for log in logs %}
+
+<tr>
+
+<td>{{ log.scanned_product_id }}</td>
+
+<td>{{ log.username }}</td>
+
+<td style="max-width:200px;word-break:break-word;">
+{{ log.original_blockchain_tx_hash }}
+</td>
+
+<td style="max-width:200px;word-break:break-word;">
+{{ log.scanned_tx_hash }}
+</td>
+
+<td>
+
+{% if log.status == "genuine" %}
+<span class="badge bg-success">Genuine</span>
+{% else %}
+<span class="badge bg-danger">Fake</span>
+{% endif %}
+
+</td>
+
+<td>
+{{ log.ist_date.strftime("%d %b %Y %I:%M %p") if log.ist_date }}
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<!-- ================= CHART SECTION ================= -->
+
+<div class="row mt-5">
+
+<div class="col-lg-4 mb-4">
+<div class="card border-0 shadow-sm h-100">
+<div class="card-body text-center">
+
+<h6 class="fw-semibold mb-3">
+Verification Status
+</h6>
+
+<canvas id="verificationChart"></canvas>
+
+</div>
+</div>
+</div>
+
+
+<div class="col-lg-4 mb-4">
+<div class="card border-0 shadow-sm h-100">
+<div class="card-body text-center">
+
+<h6 class="fw-semibold mb-3">
+Product Credibility
+</h6>
+
+<canvas id="productCredChart"></canvas>
+
+</div>
+</div>
+</div>
+
+
+<div class="col-lg-4 mb-4">
+<div class="card border-0 shadow-sm h-100">
+<div class="card-body text-center">
+
+<h6 class="fw-semibold mb-3">
+User Credibility
+</h6>
+
+<canvas id="userCredChart"></canvas>
+
+</div>
+</div>
+</div>
+
+</div>
+
+
+
+</div>
+</div>
+</div>
+
+
+<!-- ================= SEARCH SCRIPT ================= -->
+<script>
+function enableSearchAndFilter(searchId, filterId, tableId){
+
+const search = document.getElementById(searchId)
+const filter = document.getElementById(filterId)
+
+function run(){
+
+let searchValue = search.value.toLowerCase()
+let filterValue = filter.value.toLowerCase()
+
+document.querySelectorAll("#"+tableId+" tbody tr").forEach(row=>{
+
+let text = row.innerText.toLowerCase()
+
+let matchesSearch = text.includes(searchValue)
+
+let matchesFilter =
+filterValue === "" || text.includes(filterValue)
+
+row.style.display =
+(matchesSearch && matchesFilter) ? "" : "none"
+
+})
+
+}
+
+search.addEventListener("keyup", run)
+filter.addEventListener("change", run)
+
+}
+
+// enable all
+enableSearchAndFilter(
+"manufacturerSearch",
+"manufacturerFilter",
+"manufacturers"
+)
+
+enableSearchAndFilter(
+"customerSearch",
+"customerFilter",
+"customers"
+)
+
+enableSearchAndFilter(
+"productSearch",
+"productFilter",
+"products"
+)
+
+enableSearchAndFilter(
+"logSearch",
+"logFilter",
+"logs"
+)
+
+</script>
+
+<!-- ================= CHART SCRIPT ================= -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+// ================= VERIFICATION CHART =================
+
+const genuineCount =
+{{ logs | selectattr("status","equalto","genuine") | list | length }};
+
+const fakeCount =
+{{ logs | selectattr("status","equalto","fake") | list | length }};
+
+new Chart(document.getElementById('verificationChart'), {
+
+type: 'doughnut',
+
+data: {
+
+labels: ['Genuine', 'Fake'],
+
+datasets: [{
+
+data: [genuineCount, fakeCount],
+
+backgroundColor: ['#198754','#dc3545']
+
+}]
+
+}
+
+});
+
+
+// ================= PRODUCT CREDIBILITY =================
+
+const productCredibility = [
+
+{% for p in products %}
+{{ p.credibility_score if p.credibility_score is defined else 100 }},
+{% endfor %}
+
+];
+
+const avgProductCred =
+productCredibility.length > 0
+? Math.round(productCredibility.reduce((a,b)=>a+b,0) / productCredibility.length)
+: 100;
+
+new Chart(document.getElementById('productCredChart'), {
+
+type: 'doughnut',
+
+data: {
+
+labels: ['Credible', 'Risk'],
+
+datasets: [{
+
+data: [avgProductCred, 100 - avgProductCred],
+
+backgroundColor: ['#0d6efd','#ffc107']
+
+}]
+
+}
+
+});
+
+
+// ================= USER CREDIBILITY =================
+
+// ================= USER CREDIBILITY (CUSTOMERS + MANUFACTURERS) =================
+
+// Combine both lists
+const userCredibility = [
+
+{% for u in customers %}
+{{ u.credibility_score if u.credibility_score is defined else 100 }},
+{% endfor %}
+
+{% for u in manufacturers %}
+{{ u.credibility_score if u.credibility_score is defined else 100 }},
+{% endfor %}
+
+];
+
+// Calculate average credibility
+const avgUserCred =
+userCredibility.length > 0
+? Math.round(
+userCredibility.reduce((a,b)=>a+b,0)
+/
+userCredibility.length
+)
+: 100;
+
+
+// Chart
+new Chart(
+document.getElementById('userCredChart'),
+{
+type: 'doughnut',
+
+data: {
+
+labels: ['Trusted Users', 'Risk Users'],
+
+datasets: [{
+
+data: [avgUserCred, 100 - avgUserCred],
+
+backgroundColor: ['#20c997','#dc3545']
+
+}]
+
+}
+
+});
+
+</script>
+
+<script>
+
+// Save active tab when clicked
+document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(tab => {
+
+    tab.addEventListener('click', function(){
+
+        localStorage.setItem(
+            "activeAdminTab",
+            this.getAttribute("data-bs-target")
+        );
+
+    });
+
+});
+
+// Restore active tab after page reload
+document.addEventListener("DOMContentLoaded", function(){
+
+    let activeTab = localStorage.getItem("activeAdminTab");
+
+    if(activeTab){
+
+        let trigger =
+        document.querySelector(
+            'button[data-bs-target="' + activeTab + '"]'
+        );
+
+        if(trigger){
+
+            let tab = new bootstrap.Tab(trigger);
+
+            tab.show();
+
+        }
+
+    }
+
+});
+
+</script>
+
+<!-- ✅ AUTO SWITCH TAB -->
+
+{% if selected_manufacturer %}
+
+<script>
+
+document.addEventListener("DOMContentLoaded",function(){
+
+let trigger =
+document.querySelector(
+'button[data-bs-target="#products"]'
+);
+
+let tab = new bootstrap.Tab(trigger);
+
+tab.show();
+
+});
+
+</script>
+
+{% endif %}
+
+{% endblock %}
