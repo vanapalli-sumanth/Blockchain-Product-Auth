@@ -195,6 +195,7 @@ def home():
     return render_template("home.html")
 
 # ---------- GOOGLE LOGIN ----------
+# ---------- GOOGLE LOGIN ----------
 @app.route("/google-login")
 def google_login():
 
@@ -204,11 +205,8 @@ def google_login():
 
     authorization_endpoint = google_provider_cfg["authorization_endpoint"]
 
-    # FIXED redirect URI
-    if "onrender.com" in request.host:
-        redirect_uri = "https://blockchain-product-auth.onrender.com/google-auth"
-    else:
-        redirect_uri = "http://127.0.0.1:5000/google-auth"
+    # ✅ ALWAYS USE ENV VARIABLE
+    redirect_uri = os.getenv("APP_BASE_URL") + "/google-auth"
 
     request_uri = requests.Request(
         "GET",
@@ -223,6 +221,7 @@ def google_login():
 
     return redirect(request_uri)
 
+# ---------- GOOGLE AUTH CALLBACK ----------
 # ---------- GOOGLE AUTH CALLBACK ----------
 @app.route("/google-auth")
 def google_auth():
@@ -239,10 +238,8 @@ def google_auth():
 
     token_endpoint = google_provider_cfg["token_endpoint"]
 
-    if "onrender.com" in request.host:
-        redirect_uri = "https://blockchain-product-auth.onrender.com/google-auth"
-    else:
-        redirect_uri = "http://127.0.0.1:5000/google-auth"
+    # ✅ ALWAYS USE ENV VARIABLE
+    redirect_uri = os.getenv("APP_BASE_URL") + "/google-auth"
 
     token_response = requests.post(
         token_endpoint,
@@ -260,7 +257,6 @@ def google_auth():
 
     token_json = token_response.json()
 
-    # FIX: check access_token exists
     if "access_token" not in token_json:
 
         print("GOOGLE TOKEN ERROR:", token_json)
