@@ -116,7 +116,7 @@ def send_approval_email(to_email, full_name):
 
     except Exception as e:
         print("EMAIL FAILED:", str(e))
-        
+
 def get_location_from_gps(lat, lon):
 
     try:
@@ -249,13 +249,16 @@ def google_auth():
 
     code = request.args.get("code")
 
+    if not code:
+        flash("Google login failed: No code received", "danger")
+        return redirect("/login")
+
     google_provider_cfg = requests.get(
         os.getenv("GOOGLE_DISCOVERY_URL")
     ).json()
 
     token_endpoint = google_provider_cfg["token_endpoint"]
 
-    # correct redirect URI
     if "onrender.com" in request.host:
         redirect_uri = "https://blockchain-product-auth.onrender.com/google-auth"
     else:
@@ -277,52 +280,53 @@ def google_auth():
 
     token_json = token_response.json()
 
+    # FIX: check access_token exists
+    if "access_token" not in token_json:
+
+        print("GOOGLE TOKEN ERROR:", token_json)
+
+        flash("Google login failed. Please try again.", "danger")
+
+        return redirect("/login")
+
+    access_token = token_json["access_token"]
+
     userinfo_endpoint = google_provider_cfg["userinfo_endpoint"]
 
     userinfo_response = requests.get(
         userinfo_endpoint,
         headers={
-            "Authorization": f"Bearer {token_json['access_token']}"
+            "Authorization": f"Bearer {access_token}"
         },
     )
 
     userinfo = userinfo_response.json()
 
-    email = userinfo["email"]
-    name = userinfo["name"]
+    email = userinfo.get("email")
+    name = userinfo.get("name")
+
+    if not email:
+        flash("Google login failed. No email received.", "danger")
+        return redirect("/login")
 
     user = users_collection.find_one({"email": email})
 
-    # ---------- NEW USER ----------
     if not user:
 
         session["google_name"] = name
         session["google_email"] = email
 
-        flash("Google account detected. Please select your role.", "info")
-
         return redirect("/select-role")
 
-
-    # ---------- BLOCK CHECK ----------
     if not user.get("is_active", True):
 
         session.clear()
-
-        flash("Your account has been blocked by admin", "danger")
-
+        flash("Your account has been blocked", "danger")
         return redirect("/login")
 
-
-    # ---------- LOGIN ALLOWED ----------
     session["user"] = user["username"]
-
-    # ⭐ ADD THIS LINE
     session["full_name"] = user["full_name"]
-
     session["role"] = user["role"]
-
-    flash("Login successful", "success")
 
     if user["role"] == "manufacturer":
         return redirect("/manufacturer/dashboard")
