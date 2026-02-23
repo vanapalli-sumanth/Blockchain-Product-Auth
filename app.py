@@ -35,67 +35,78 @@ IST = pytz.timezone("Asia/Kolkata")
 
 def send_approval_email(to_email, full_name):
 
-    sender = os.getenv("EMAIL_USER")
-    password = os.getenv("EMAIL_PASS")
-    base_url = os.getenv("APP_BASE_URL")
-
-    if not sender or not password or not base_url:
-        print("Email config missing:", sender, password, base_url)
-        return
-
     try:
+
+        api_key = os.getenv("BREVO_API_KEY")
+        sender = os.getenv("EMAIL_USER")
+        base_url = os.getenv("APP_BASE_URL")
+
+        if not api_key or not sender or not base_url:
+            print("Brevo config missing")
+            return
 
         login_url = base_url + "/login"
 
-        subject = "Your Manufacturer Account has been Approved ✅"
+        url = "https://api.brevo.com/v3/smtp/email"
 
-        html_body = f"""
-        <html>
-        <body>
+        headers = {
+            "accept": "application/json",
+            "api-key": api_key,
+            "content-type": "application/json"
+        }
 
-        <h2>Your Manufacturer Account is Approved 🎉</h2>
+        payload = {
+            "sender": {
+                "name": "BlockAuth",
+                "email": sender
+            },
+            "to": [
+                {
+                    "email": to_email,
+                    "name": full_name
+                }
+            ],
+            "subject": "Your Manufacturer Account has been Approved ✅",
+            "htmlContent": f"""
+                <html>
+                <body>
 
-        <p>Hello <b>{full_name}</b>,</p>
+                <h2>Your Manufacturer Account is Approved 🎉</h2>
 
-        <p>Your manufacturer account has been approved.</p>
+                <p>Hello <b>{full_name}</b>,</p>
 
-        <a href="{login_url}"
-        style="
-        background:#0b2a6e;
-        color:white;
-        padding:12px 24px;
-        text-decoration:none;
-        border-radius:6px;">
-        Login Now
-        </a>
+                <p>Your manufacturer account has been approved.</p>
 
-        <p>{login_url}</p>
+                <a href="{login_url}"
+                style="
+                background:#0b2a6e;
+                color:white;
+                padding:12px 24px;
+                text-decoration:none;
+                border-radius:6px;">
+                Login Now
+                </a>
 
-        </body>
-        </html>
-        """
+                <p>{login_url}</p>
 
-        msg = MIMEMultipart("alternative")
+                </body>
+                </html>
+            """
+        }
 
-        msg["From"] = sender
-        msg["To"] = to_email
-        msg["Subject"] = subject
+        response = requests.post(
+            url,
+            json=payload,
+            headers=headers,
+            timeout=10
+        )
 
-        msg.attach(MIMEText(html_body, "html"))
-
-        # ✅ USE SSL (WORKS ON RENDER)
-        server = smtplib.SMTP_SSL("smtp.gmail.com", 465)
-
-        server.login(sender, password)
-
-        server.sendmail(sender, to_email, msg.as_string())
-
-        server.quit()
-
-        print("Approval email sent successfully to", to_email)
+        print("Brevo Status:", response.status_code)
+        print("Brevo Response:", response.text)
 
     except Exception as e:
-        print("EMAIL FAILED:", str(e))
+
+        print("BREVO EMAIL FAILED:", str(e))
         
 def get_location_from_gps(lat, lon):
 
