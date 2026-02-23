@@ -28,6 +28,17 @@ from openpyxl import Workbook
 from openpyxl.drawing.image import Image as XLImage
 load_dotenv()
 
+# ---------- GET REAL CLIENT IP ----------
+def get_real_ip():
+
+    if request.headers.get("X-Forwarded-For"):
+        return request.headers.get("X-Forwarded-For").split(",")[0].strip()
+
+    if request.headers.get("X-Real-IP"):
+        return request.headers.get("X-Real-IP")
+
+    return request.remote_addr
+
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
 
@@ -1227,13 +1238,15 @@ def export_products_excel():
 
             "Name": p.get("name"),
 
+            "Manufacturer Name": p.get("manufacturer_name"),   # ✅ ADDED
+
             "Brand": p.get("manufacturer_brand"),
 
             "Blockchain Tx Hash": p.get("tx_hash"),
 
             "Quantity": p.get("quantity"),
 
-            "Added Date": ist_time
+            "Added Date (IST)": ist_time
 
         })
 
@@ -1253,7 +1266,7 @@ def export_products_excel():
 
     response.headers[
         "Content-Disposition"
-    ] = "attachment; filename=manufacturer_dashboard.xlsx"
+    ] = "attachment; filename=manufacturer_products.xlsx"
 
     response.headers[
         "Content-Type"
@@ -1303,9 +1316,6 @@ def manufacturer_product_units(product_id):
     )
 
 # ---------- EXPORT PRODUCT UNITS EXCEL ----------
-from openpyxl import Workbook
-from openpyxl.drawing.image import Image as XLImage
-
 @app.route("/manufacturer/export-units-excel/<product_id>")
 def export_units_excel(product_id):
 
@@ -1567,7 +1577,7 @@ def scan_signature(signature):
             "signature": signature.strip()
         })
 
-        scanner_ip = request.remote_addr
+        scanner_ip = get_real_ip()
 
         lat = request.args.get("lat")
         lon = request.args.get("lon")
@@ -1733,7 +1743,7 @@ def verify_scratch():
             scanner_location = get_location_from_gps(lat, lon)
 
 
-        scanner_ip = request.remote_addr
+        scanner_ip = get_real_ip()
 
 
         now = datetime.utcnow()
@@ -1946,6 +1956,8 @@ def save_verification_log(product, unit, username, status, location):
 
     now = datetime.utcnow()
 
+    real_ip = get_real_ip()
+
     verification_logs_collection.insert_one({
 
         "product_id": product.get("product_id"),
@@ -1955,9 +1967,9 @@ def save_verification_log(product, unit, username, status, location):
         "username": username,
         "status": status,
         "location": location,
-        "ip_address": request.remote_addr,
+        "ip_address": real_ip,
 
-        # OWNER (PERMANENT)
+        # OWNER
         "owner_username": unit.get("owner_username"),
         "owner_location": unit.get("owner_location"),
         "owner_ip_address": unit.get("owner_ip_address"),
@@ -1986,14 +1998,13 @@ def save_verification_log(product, unit, username, status, location):
                     "username": username,
                     "status": status,
                     "location": location,
-                    "ip_address": request.remote_addr,
+                    "ip_address": real_ip,
                     "date": now
                 }
             }
         }
     )
 
-# ---------- CUSTOMER DASHBOARD ----------
 # ---------- CUSTOMER DASHBOARD ----------
 @app.route("/customer/dashboard")
 def customer_dashboard():

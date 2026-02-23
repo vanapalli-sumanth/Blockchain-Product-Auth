@@ -315,11 +315,12 @@ const lon = position.coords.longitude;
 let separator =
 decodedText.includes("?") ? "&" : "?";
 
-window.location.href =
-decodedText +
-separator +
-"lat=" + lat +
-"&lon=" + lon;
+const url = new URL(decodedText);
+
+url.searchParams.set("lat", lat);
+url.searchParams.set("lon", lon);
+
+window.location.href = url.toString();
 
 },
 
