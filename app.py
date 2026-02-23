@@ -35,16 +35,22 @@ IST = pytz.timezone("Asia/Kolkata")
 
 def send_approval_email(to_email, full_name):
 
+    sender = os.getenv("EMAIL_USER")
+    password = os.getenv("EMAIL_PASS")
+    base_url = os.getenv("APP_BASE_URL")
+
+    # SAFETY CHECK
+    if not sender or not password or not base_url:
+        print("Email config missing:",
+              sender, password, base_url)
+        return
+
     try:
 
-        sender = os.getenv("EMAIL_USER")
-        password = os.getenv("EMAIL_PASS")
-
-        login_url = os.getenv("APP_BASE_URL") + "/login"
+        login_url = base_url + "/login"
 
         subject = "Your Manufacturer Account has been Approved ✅"
 
-        # HTML EMAIL BODY
         html_body = f"""
         <html>
         <body style="font-family: Arial, sans-serif;">
@@ -57,10 +63,7 @@ def send_approval_email(to_email, full_name):
 
             <p>
                 Your manufacturer account has been approved by the admin.
-                You can now login and start adding products.
             </p>
-
-            <br>
 
             <a href="{login_url}"
             style="
@@ -77,45 +80,43 @@ def send_approval_email(to_email, full_name):
 
             <br><br>
 
-            <p>
-                Or copy this link:<br>
-                {login_url}
-            </p>
-
-            <br>
-
-            <p style="color:#666;">
-                BlockAuth Team
-            </p>
+            <p>{login_url}</p>
 
         </body>
         </html>
         """
 
         msg = MIMEMultipart("alternative")
-
         msg["From"] = sender
         msg["To"] = to_email
         msg["Subject"] = subject
 
-        # IMPORTANT: use html instead of plain
         msg.attach(MIMEText(html_body, "html"))
 
-        server = smtplib.SMTP("smtp.gmail.com", 587)
-        server.starttls()
+        # FIX 1: use timeout
+        server = smtplib.SMTP("smtp.gmail.com", 587, timeout=30)
 
+        # FIX 2: ehlo required for Render
+        server.ehlo()
+
+        # FIX 3: starttls with ehlo again
+        server.starttls()
+        server.ehlo()
+
+        # LOGIN
         server.login(sender, password)
 
-        server.send_message(msg)
+        # SEND
+        server.sendmail(sender, to_email, msg.as_string())
 
+        # CLOSE
         server.quit()
 
-        print("Approval email sent")
+        print("Approval email sent successfully to", to_email)
 
     except Exception as e:
-        print("Email error:", e)
-
-
+        print("EMAIL FAILED:", str(e))
+        
 def get_location_from_gps(lat, lon):
 
     try:
