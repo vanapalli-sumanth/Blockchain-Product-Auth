@@ -39,10 +39,8 @@ def send_approval_email(to_email, full_name):
     password = os.getenv("EMAIL_PASS")
     base_url = os.getenv("APP_BASE_URL")
 
-    # SAFETY CHECK
     if not sender or not password or not base_url:
-        print("Email config missing:",
-              sender, password, base_url)
+        print("Email config missing:", sender, password, base_url)
         return
 
     try:
@@ -53,70 +51,52 @@ def send_approval_email(to_email, full_name):
 
         html_body = f"""
         <html>
-        <body style="font-family: Arial, sans-serif;">
+        <body>
 
-            <h2 style="color:#0b2a6e;">
-                Your Manufacturer Account is Approved 🎉
-            </h2>
+        <h2>Your Manufacturer Account is Approved 🎉</h2>
 
-            <p>Hello <b>{full_name}</b>,</p>
+        <p>Hello <b>{full_name}</b>,</p>
 
-            <p>
-                Your manufacturer account has been approved by the admin.
-            </p>
+        <p>Your manufacturer account has been approved.</p>
 
-            <a href="{login_url}"
-            style="
-                background:#0b2a6e;
-                color:white;
-                padding:12px 24px;
-                text-decoration:none;
-                border-radius:6px;
-                font-weight:bold;
-                display:inline-block;
-            ">
-                Login Now
-            </a>
+        <a href="{login_url}"
+        style="
+        background:#0b2a6e;
+        color:white;
+        padding:12px 24px;
+        text-decoration:none;
+        border-radius:6px;">
+        Login Now
+        </a>
 
-            <br><br>
-
-            <p>{login_url}</p>
+        <p>{login_url}</p>
 
         </body>
         </html>
         """
 
         msg = MIMEMultipart("alternative")
+
         msg["From"] = sender
         msg["To"] = to_email
         msg["Subject"] = subject
 
         msg.attach(MIMEText(html_body, "html"))
 
-        # FIX 1: use timeout
-        server = smtplib.SMTP("smtp.gmail.com", 587, timeout=30)
+        # ✅ USE SSL (WORKS ON RENDER)
+        server = smtplib.SMTP_SSL("smtp.gmail.com", 465)
 
-        # FIX 2: ehlo required for Render
-        server.ehlo()
-
-        # FIX 3: starttls with ehlo again
-        server.starttls()
-        server.ehlo()
-
-        # LOGIN
         server.login(sender, password)
 
-        # SEND
         server.sendmail(sender, to_email, msg.as_string())
 
-        # CLOSE
         server.quit()
 
         print("Approval email sent successfully to", to_email)
 
     except Exception as e:
         print("EMAIL FAILED:", str(e))
-
+        
 def get_location_from_gps(lat, lon):
 
     try:
