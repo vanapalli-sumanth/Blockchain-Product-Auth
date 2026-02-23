@@ -96,6 +96,9 @@ font-size:28px;
 background:#16a34a;
 }
 
+.flash-warning{
+background:#f59e0b;
+}
 
 /* ERROR */
 
@@ -180,7 +183,7 @@ Admin Panel
 
 <li class="nav-item ms-3">
 <span class="nav-link fw-bold">
-👤 {{session.get("user")}}
+👤 {{session.get("full_name") or session.get("user")}}
 </span>
 </li>
 
@@ -239,8 +242,14 @@ Logout
 {% elif category=="danger" %}
 <i class="fa-solid fa-xmark"></i>
 
-{% else %}
+{% elif category=="warning" %}
+<i class="fa-solid fa-triangle-exclamation"></i>
+
+{% elif category=="info" %}
 <i class="fa-solid fa-circle-info"></i>
+
+{% else %}
+<i class="fa-solid fa-bell"></i>
 
 {% endif %}
 
@@ -253,6 +262,12 @@ Success
 
 {% elif category=="danger" %}
 Error
+
+{% elif category=="warning" %}
+Warning
+
+{% elif category=="info" %}
+Notice
 
 {% else %}
 Notice
@@ -302,9 +317,11 @@ Are you sure you want to perform this action?
 Cancel
 </button>
 
-<a href="#" id="confirmBtn" class="btn btn-danger">
+<form id="confirmForm" method="POST">
+<button type="submit" class="btn btn-danger">
 OK
-</a>
+</button>
+</form>
 
 </div>
 
@@ -446,27 +463,24 @@ flashWrapper.style.display="none";
 
 document.addEventListener("DOMContentLoaded", function(){
 
-    const confirmModal =
-        document.getElementById("confirmModal");
+const confirmModal =
+document.getElementById("confirmModal");
 
-    const confirmBtn =
-        document.getElementById("confirmBtn");
+const confirmForm =
+document.getElementById("confirmForm");
 
-    confirmModal.addEventListener(
-        "show.bs.modal",
-        function(event)
-        {
+confirmModal.addEventListener(
+"show.bs.modal",
+function(event){
 
-            const button =
-                event.relatedTarget;
+const button = event.relatedTarget;
 
-            const url =
-                button.getAttribute("data-url");
+const url =
+button.getAttribute("data-url");
 
-            confirmBtn.href = url;
+confirmForm.action = url;
 
-        }
-    );
+});
 
 });
 

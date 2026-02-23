@@ -14,6 +14,5 @@ db = client["fake_product_db"]
 # Collections
 users_collection = db["users"]
 products_collection = db["products"]
-
-# ✅ ADD THIS
+product_units_collection = db["product_units"]
 verification_logs_collection = db["verification_logs"]

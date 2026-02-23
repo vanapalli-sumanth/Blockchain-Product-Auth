@@ -5,55 +5,47 @@
 
 <div class="container mt-5 mb-5">
 
-
-<!-- ================= BIG BACKGROUND CARD ================= -->
-
 <div class="card border-0 shadow-lg">
 
 <div class="card-body p-4 p-md-5">
 
+<!-- HEADER -->
 
-<!-- ================= HEADER ================= -->
-
-<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4">
 
 <div>
 
-<h2 class="fw-bold mb-1" style="color:#0b2a6e;">
+<h2 style="color:#0b2a6e;font-weight:600;">
 Verification Logs
 </h2>
 
 <p class="text-muted mb-0">
-View blockchain verification history for this product
+Blockchain verification history
 </p>
 
 </div>
 
-<div class="mt-3 mt-md-0">
+<div>
 
 <a href="/manufacturer/export-logs-excel/{{ product.product_id }}"
-class="btn btn-success me-2">
+class="btn btn-success">
 
 <i class="fa-solid fa-file-excel me-1"></i>
 Export Excel
 
 </a>
 
-<a href="/manufacturer/export-logs-pdf/{{ product.product_id }}"
-class="btn btn-danger">
-
-<i class="fa-solid fa-file-pdf me-1"></i>
-Export PDF
-
-</a>
-
 </div>
 
 </div>
+{% if viewing_as_admin %}
+<div class="alert alert-warning mb-3">
+<i class="fa-solid fa-user-shield me-2"></i>
+Viewing as Admin
+</div>
+{% endif %}
 
-
-
-<!-- ================= PRODUCT INFO CARD ================= -->
+<!-- PRODUCT INFO -->
 
 <div class="card border-0 shadow-sm mb-4">
 
@@ -61,31 +53,71 @@ Export PDF
 
 <div class="row">
 
-<div class="col-md-6 mb-2">
+<div class="col-md-4 mb-3">
 
-<strong>Product Name:</strong><br>
-<span class="text-muted">{{ product.name }}</span>
+<div class="text-muted small">Product Name</div>
+<div style="font-weight:600;">
+{{ product.name }}
+</div>
 
 </div>
 
-<div class="col-md-6 mb-2">
+<div class="col-md-4 mb-3">
 
-<strong>Product ID:</strong><br>
-<span class="text-muted">{{ product.product_id }}</span>
+<div class="text-muted small">Brand</div>
+
+<div style="font-weight:600;">
+{{ product.manufacturer_brand }}
+</div>
 
 </div>
 
-<div class="col-12">
+<div class="col-md-4 mb-3">
 
-<strong>Original Blockchain Tx Hash:</strong><br>
+<div class="text-muted small">Product ID</div>
+<div style="font-weight:600;">
+{{ product.product_id }}
+</div>
 
-<span class="text-muted"
-style="word-break:break-word; font-size:14px;">
+</div>
 
+<div class="col-md-4 mb-3">
+
+<div class="text-muted small">Manufacturer</div>
+<div style="font-weight:600;">
+{{ product.manufacturer_name }}
+</div>
+
+</div>
+
+<div class="col-md-4 mb-3">
+
+<div class="text-muted small">Manufactured Date</div>
+<div style="font-weight:600;">
+
+{% if product.created_at %}
+{{ product.created_at_ist.strftime("%d %b %Y %I:%M %p") if product.created_at_ist }}
+{% endif %}
+
+</div>
+
+</div>
+
+<div class="col-md-4 mb-3">
+
+<div class="text-muted small">Total Units</div>
+<div style="font-weight:600;">
+{{ product.quantity }}
+</div>
+
+</div>
+
+<div class="col-md-12">
+
+<div class="text-muted small">Blockchain Hash</div>
+
+<div style="font-weight:600;font-size:14px;word-break:break-word;">
 {{ product.tx_hash }}
-
-</span>
-
 </div>
 
 </div>
@@ -94,79 +126,69 @@ style="word-break:break-word; font-size:14px;">
 
 </div>
 
+</div>
 
+<div class="row p-3">
 
-<!-- ================= SEARCH + FILTER CARD ================= -->
-
-<div class="card border-0 shadow-sm mb-4">
-
-<div class="card-body">
-
-<div class="row g-3">
-
-<div class="col-md-4">
-
-<label class="form-label fw-semibold">
-<i class="fa-solid fa-magnifying-glass me-1"></i>
-Search
-</label>
+<div class="col-md-4 mb-2">
 
 <input type="text"
 id="searchInput"
-class="form-control form-control-lg"
-placeholder="Search username or product ID">
+class="form-control form-control-sm"
+placeholder="Search product, user, unit, IP">
 
 </div>
 
-<div class="col-md-4">
-
-<label class="form-label fw-semibold">
-<i class="fa-solid fa-link me-1"></i>
-Match Status
-</label>
-
-<select id="matchFilter"
-class="form-control form-control-lg">
-
-<option value="">All</option>
-<option value="matched">Matched</option>
-<option value="mismatched">Mismatched</option>
-
-</select>
-
-</div>
-
-<div class="col-md-4">
-
-<label class="form-label fw-semibold">
-<i class="fa-solid fa-shield me-1"></i>
-Verification Status
-</label>
+<div class="col-md-3 mb-2">
 
 <select id="statusFilter"
-class="form-control form-control-lg">
+class="form-control form-control-sm">
 
-<option value="">All</option>
+<option value="">All Status</option>
 <option value="genuine">Genuine</option>
 <option value="fake">Fake</option>
+<option value="duplicate">Duplicate</option>
+<option value="already_verified">Already Verified</option>
+
+</select>
+
+</div>
+
+<div class="col-md-3 mb-2">
+
+<select id="matchFilter"
+class="form-control form-control-sm">
+
+<option value="">Blockchain Match</option>
+<option value="matched">Matched</option>
+<option value="mismatch">Mismatch</option>
+
+</select>
+
+</div>
+
+<div class="col-md-2 mb-2">
+
+<select id="dateFilter"
+class="form-control form-control-sm">
+
+<option value="">All Dates</option>
+<option value="today">Today</option>
+<option value="week">Last 7 days</option>
+<option value="month">Last 30 days</option>
 
 </select>
 
 </div>
 
 </div>
-
-</div>
-
-</div>
-
-
-
-<!-- ================= TABLE CARD ================= -->
+<!-- TABLE -->
 
 <div class="card border-0 shadow-sm">
 
 <div class="card-body p-0">
+
+<!-- SEARCH RIGHT -->
 
 <div class="table-responsive">
 
@@ -176,19 +198,16 @@ class="form-control form-control-lg">
 
 <tr>
 
-<th class="ps-4">Product ID</th>
-
-<th>Username</th>
-
-<th>Original Blockchain Hash</th>
-
-<th>Scanned Hash</th>
-
-<th>Match Status</th>
-
-<th>Verification Result</th>
-
-<th class="pe-4">Date</th>
+<th>Product ID</th>
+<th>Unit ID</th>
+<th>User</th>
+<th>Owner</th>
+<th>Scratch</th>
+<th>Blockchain</th>
+<th>Status</th>
+<th>Location</th>
+<th>IP Address</th>
+<th>Date</th>
 
 </tr>
 
@@ -198,59 +217,118 @@ class="form-control form-control-lg">
 
 {% for log in logs %}
 
-<tr>
+<tr
+data-status="{{ log.status }}"
+data-match="{{ log.match_status }}"
+data-date="{{ log.ist_date.strftime('%Y-%m-%d') if log.ist_date else '' }}"
+>
 
-<td class="ps-4">
-{{ log.scanned_product_id }}
+<td>
+{{ log.product_id }}
+</td>
+
+<td>
+{{ log.unit_id }}
 </td>
 
 <td>
 {{ log.username }}
 </td>
 
-<td style="max-width:200px;word-break:break-word;font-size:14px;">
-{{ log.original_blockchain_tx_hash }}
+<td>
+{{ log.owner_username or "Not claimed" }}
 </td>
 
-<td style="max-width:200px;word-break:break-word;font-size:14px;">
-{{ log.scanned_tx_hash }}
+<td>
+{{ log.scratch_plain }}
+</td>
+
+
+<!-- MATCH LABEL -->
+
+<td>
+
+{% if log.match_status=="matched" %}
+
+<span class="badge"
+style="background:#16a34a;">
+
+Matched
+
+</span>
+
+{% else %}
+
+<span class="badge"
+style="background:#dc2626;">
+
+Mismatch
+
+</span>
+
+{% endif %}
+
+</td>
+
+
+<!-- STATUS LABEL -->
+
+<td>
+
+{% if log.status=="genuine" %}
+
+<span class="badge"
+style="background:#16a34a;">
+Genuine
+</span>
+
+{% elif log.status=="already_verified" %}
+
+<span class="badge"
+style="background:#facc15;color:black;">
+Already Verified
+</span>
+
+{% elif log.status=="duplicate" %}
+
+<span class="badge"
+style="background:#f97316;">
+Duplicate
+</span>
+
+{% elif log.status=="fake" %}
+
+<span class="badge"
+style="background:#dc2626;">
+Fake
+</span>
+
+{% endif %}
+
+</td>
+
+
+<td>
+{{ log.location }}
+</td>
+
+<td>
+{{ log.ip_address }}
 </td>
 
 <td>
 
-<span class="badge px-3 py-2 bg-{% if log.match_status=='matched' %}success{% else %}danger{% endif %}">
+{% if log.ist_date %}
 
-{% if log.match_status=='matched' %}
-<i class="fa-solid fa-check me-1"></i>
-{% else %}
-<i class="fa-solid fa-xmark me-1"></i>
+{{ log.ist_date.strftime("%d %b %Y") }}
+
+<br>
+
+<small class="text-muted">
+{{ log.ist_date.strftime("%I:%M %p") }}
+</small>
+
 {% endif %}
-
-{{ log.match_status }}
-
-</span>
-
-</td>
-
-<td>
-
-<span class="badge px-3 py-2 bg-{% if log.status=='genuine' %}success{% else %}danger{% endif %}">
-
-{% if log.status=='genuine' %}
-<i class="fa-solid fa-shield-check me-1"></i>
-{% else %}
-<i class="fa-solid fa-triangle-exclamation me-1"></i>
-{% endif %}
-
-{{ log.status }}
-
-</span>
-
-</td>
-
-<td class="pe-4">
-
-{{ log.ist_date.strftime("%d %b %Y %I:%M %p") if log.ist_date }}
 
 </td>
 
@@ -260,9 +338,11 @@ class="form-control form-control-lg">
 
 <tr>
 
-<td colspan="7" class="text-center py-4 text-muted">
-<i class="fa-solid fa-database me-2"></i>
-No verification logs found
+<td colspan="10"
+class="text-center text-muted py-4">
+
+No logs found
+
 </td>
 
 </tr>
@@ -280,49 +360,86 @@ No verification logs found
 </div>
 
 
-
-</div>
-</div>
 </div>
 
+</div>
 
-
-<!-- ================= SEARCH SCRIPT ================= -->
+</div>
 
 <script>
 
-const searchInput = document.getElementById("searchInput")
-const matchFilter = document.getElementById("matchFilter")
-const statusFilter = document.getElementById("statusFilter")
+document.addEventListener("DOMContentLoaded", function(){
 
-searchInput.addEventListener("keyup", filterLogs)
-matchFilter.addEventListener("change", filterLogs)
-statusFilter.addEventListener("change", filterLogs)
+const searchInput = document.getElementById("searchInput");
+const statusFilter = document.getElementById("statusFilter");
+const matchFilter = document.getElementById("matchFilter");
+const dateFilter = document.getElementById("dateFilter");
 
 function filterLogs(){
 
-let search = searchInput.value.toLowerCase()
-let match = matchFilter.value.toLowerCase()
-let status = statusFilter.value.toLowerCase()
+let search = searchInput.value.toLowerCase();
+let status = statusFilter.value;
+let match = matchFilter.value;
+let date = dateFilter.value;
 
-let rows = document.querySelectorAll("#logTable tr")
+let rows = document.querySelectorAll("#logTable tr");
 
 rows.forEach(row=>{
 
-let text = row.innerText.toLowerCase()
+let text = row.innerText.toLowerCase();
 
-let matchOk = match=="" || text.includes(match)
-let statusOk = status=="" || text.includes(status)
-let searchOk = text.includes(search)
+let rowStatus = row.dataset.status;
+let rowMatch = row.dataset.match;
+let rowDate = row.dataset.date;
 
-row.style.display =
-(matchOk && statusOk && searchOk)
-? ""
-: "none"
+let matchSearch = text.includes(search);
 
-})
+let matchStatus =
+!status || rowStatus === status;
+
+let matchBlockchain =
+!match || rowMatch === match;
+
+let matchDate = true;
+
+if(date){
+
+let today = new Date();
+let logDate = new Date(rowDate);
+
+let diffDays =
+(today - logDate) /
+(1000*60*60*24);
+
+if(date==="today")
+matchDate = diffDays < 1;
+
+else if(date==="week")
+matchDate = diffDays <= 7;
+
+else if(date==="month")
+matchDate = diffDays <= 30;
 
 }
+
+row.style.display =
+(matchSearch &&
+matchStatus &&
+matchBlockchain &&
+matchDate)
+? ""
+: "none";
+
+});
+
+}
+
+searchInput.addEventListener("keyup", filterLogs);
+statusFilter.addEventListener("change", filterLogs);
+matchFilter.addEventListener("change", filterLogs);
+dateFilter.addEventListener("change", filterLogs);
+
+});
 
 </script>
 

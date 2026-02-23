@@ -1,0 +1,222 @@
+{% extends "admin_layout.html" %}
+
+{% block admin_content %}
+
+<div class="admin-dashboard-wrapper mb-4">
+
+<div class="card border-0 shadow-lg" style="border-radius:14px;background:white;">
+
+<div class="card-body p-4 p-md-5">
+
+<!-- HEADER -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+
+<div>
+
+<h1 style="color:#0b2a6e;font-size:26px;font-weight:600;margin-bottom:6px;">
+Customers
+</h1>
+
+<p style="font-size:15px;color:#64748b;margin:0;">
+Manage customer accounts and verification activity
+</p>
+
+</div>
+
+<div>
+<a href="/admin/export-customers-excel"
+class="btn btn-sm"
+style="background:#eeeeb5;border-radius:8px;font-weight:500;">
+Export Excel
+</a>
+</div>
+
+</div>
+
+<div class="row mb-3">
+
+<div class="col-md-4 mb-2">
+<input type="text"
+id="searchCustomer"
+class="form-control"
+placeholder="Search username, name, email">
+</div>
+
+<div class="col-md-3 mb-2">
+<select id="customerStatusFilter" class="form-control">
+<option value="">All Status</option>
+<option value="active">Active</option>
+<option value="blocked">Blocked</option>
+</select>
+</div>
+
+</div>
+<!-- TABLE -->
+<div class="card border-0 shadow-sm" style="border-radius:12px;">
+
+<div class="table-responsive">
+
+<table class="table align-middle text-center mb-0">
+
+<thead style="background:#f1f5f9;">
+
+<tr style="font-weight:600;color:#000;white-space:nowrap;">
+
+<th>Username</th>
+<th>Full Name</th>
+<th>Email</th>
+<th>Created</th>
+<th>Status</th>
+<th>Actions</th>
+
+</tr>
+
+</thead>
+
+<tbody id="customerTable">
+
+{% for c in customers %}
+
+<tr data-status="{{ 'active' if c.is_active else 'blocked' }}">
+
+<td>{{ c.username }}</td>
+
+<td>{{ c.full_name }}</td>
+
+<td>{{ c.email }}</td>
+
+<td>
+
+{% if c.created_at_ist %}
+{{ c.created_at_ist.strftime("%d %b %Y") }}
+<br>
+<small>{{ c.created_at_ist.strftime("%I:%M %p") }}</small>
+{% endif %}
+
+</td>
+
+
+<td>
+
+{% if c.is_active %}
+<span class="badge bg-success">Active</span>
+{% else %}
+<span class="badge bg-danger">Blocked</span>
+{% endif %}
+
+</td>
+
+
+<td class="text-nowrap">
+
+<!-- VIEW DETAILS -->
+<a href="/admin/customer-details/{{ c.username }}"
+class="btn btn-sm btn-info">
+View Details
+</a>
+
+
+<!-- BLOCK -->
+{% if c.is_active %}
+<button class="btn btn-sm btn-warning"
+data-url="/admin/block-user/{{ c.username }}?type=customer"
+data-bs-toggle="modal"
+data-bs-target="#confirmModal">
+Block
+</button>
+{% endif %}
+
+
+<!-- UNBLOCK -->
+{% if not c.is_active %}
+<button class="btn btn-sm btn-secondary"
+data-url="/admin/unblock-user/{{ c.username }}?type=customer"
+data-bs-toggle="modal"
+data-bs-target="#confirmModal">
+Unblock
+</button>
+{% endif %}
+
+
+<!-- DELETE -->
+<button class="btn btn-sm btn-dark"
+data-url="/admin/delete-user/{{ c.username }}?type=customer"
+data-bs-toggle="modal"
+data-bs-target="#confirmModal">
+Delete
+</button>
+
+
+</td>
+
+</tr>
+
+{% else %}
+
+<tr>
+<td colspan="6" class="text-muted py-4">
+No customers found
+</td>
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<script>
+
+document.addEventListener("DOMContentLoaded", function(){
+
+const searchInput = document.getElementById("searchCustomer");
+const statusFilter = document.getElementById("customerStatusFilter");
+
+function filterCustomers(){
+
+let search = searchInput.value.toLowerCase();
+let status = statusFilter.value;
+
+let rows = document.querySelectorAll("#customerTable tr");
+
+rows.forEach(row=>{
+
+let username = row.cells[0].innerText.toLowerCase();
+let fullname = row.cells[1].innerText.toLowerCase();
+let email = row.cells[2].innerText.toLowerCase();
+
+let rowStatus = row.dataset.status;
+
+let matchSearch =
+username.includes(search) ||
+fullname.includes(search) ||
+email.includes(search);
+
+let matchStatus =
+!status || rowStatus === status;
+
+row.style.display =
+(matchSearch && matchStatus)
+? ""
+: "none";
+
+});
+
+}
+
+searchInput.addEventListener("keyup", filterCustomers);
+statusFilter.addEventListener("change", filterCustomers);
+
+});
+
+</script>
+{% endblock %}

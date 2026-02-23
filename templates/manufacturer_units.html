@@ -1,0 +1,519 @@
+{% extends "base.html" %}
+{% block title %}Product Units | BlockAuth{% endblock %}
+
+{% block content %}
+
+<div class="container mb-5" style="margin-top:90px; max-width:1350px;">
+
+<div class="card border-0 shadow-lg" style="border-radius:14px;">
+
+<div class="card-body p-3 p-md-5">
+
+<!-- ================= HEADER ================= -->
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+
+<div>
+
+<h1 style="color:#0b2a6e;font-size:28px;font-weight:600;margin-bottom:6px;">
+Product Units
+</h1>
+
+<p style="font-size:17px;font-weight:500;margin:0;color:#000;">
+
+<span style="color:#64748b;">Product:</span>
+
+<span style="font-weight:600;">
+{{ product.name }}
+</span>
+
+<br class="d-md-none">
+
+<span style="background:#111;color:white;padding:5px 12px;border-radius:6px;font-size:14px;margin-top:6px;display:inline-block;">
+{{ product.product_id }}
+</span>
+
+</p>
+
+</div>
+
+<div class="d-flex flex-row gap-2">
+
+<a href="/manufacturer/export-units-excel/{{ product.product_id }}"
+class="btn"
+style="background:#eeeeb5;color:#333;border-radius:8px;border:1px solid #e6e2c3;font-size:15px;font-weight:500;padding:7px 14px;">
+Export Excel </a>
+
+<a href="/manufacturer/dashboard"
+class="btn"
+style="background:#0b2a6e;color:white;border-radius:8px;font-size:15px;font-weight:500;padding:7px 14px;">
+Back </a>
+
+</div>
+
+</div>
+{% if viewing_as_admin %}
+<div class="alert alert-warning mb-3">
+<i class="fa-solid fa-user-shield me-2"></i>
+Viewing as Admin
+</div>
+{% endif %}
+<!-- ================= PRODUCT DETAILS ================= -->
+
+<div class="card border-0 shadow-sm mb-4" style="border-radius:12px;">
+
+<div class="card-body">
+
+<div class="row">
+
+<div class="col-md-4 mb-3">
+
+<div class="text-muted small">Product ID</div>
+
+<div style="font-weight:600;">
+{{ product.product_id }}
+</div>
+
+</div>
+
+<div class="col-md-4 mb-3">
+
+<div class="text-muted small">Product Name</div>
+
+<div style="font-weight:600;">
+{{ product.name }}
+</div>
+
+</div>
+
+<div class="col-md-4 mb-3">
+
+<div class="text-muted small">Manufacturer Name</div>
+
+<div style="font-weight:600;">
+{{ product.manufacturer_name }}
+</div>
+
+</div>
+
+<div class="col-md-4 mb-3">
+
+<div class="text-muted small">Brand</div>
+
+<div style="font-weight:600;">
+{{ product.manufacturer_brand }}
+</div>
+
+</div>
+
+<div class="col-md-4 mb-3">
+
+<div class="text-muted small">Created Date</div>
+
+<div style="font-weight:600;">
+
+{% if product.created_at %}
+
+{{ product.created_at.strftime("%d %b %Y") }}
+
+<br>
+
+<small class="text-muted">
+{{ product.created_at.strftime("%I:%M %p") }}
+</small>
+
+{% endif %}
+
+</div>
+
+</div>
+
+<div class="col-md-4 mb-3">
+
+<div class="text-muted small">Number of Units</div>
+
+<div style="font-weight:600;">
+{{ units|length }}
+</div>
+
+</div>
+
+<div class="col-md-12">
+
+<div class="text-muted small">Blockchain Transaction Hash</div>
+
+<div style="font-weight:600;word-break:break-word;">
+{{ product.tx_hash }}
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="card border-0 shadow-sm mb-4" style="border-radius:12px;">
+
+<div class="card-body p-3">
+
+<div class="row">
+
+<div class="col-md-4 mb-2">
+
+<input type="text"
+id="searchInput"
+class="form-control"
+placeholder="Search Unit ID, Scratch, Owner"
+style="font-size:15px;font-weight:500;border-radius:8px;">
+
+</div>
+
+<div class="col-md-3 mb-2">
+
+<select id="statusFilter"
+class="form-control">
+
+<option value="">All Status</option>
+<option value="used">Used</option>
+<option value="unused">Unused</option>
+
+</select>
+
+</div>
+
+<div class="col-md-3 mb-2">
+
+<select id="ownershipFilter"
+class="form-control">
+
+<option value="">All Ownership</option>
+<option value="claimed">Claimed</option>
+<option value="unclaimed">Unclaimed</option>
+
+</select>
+
+</div>
+
+<div class="col-md-2 mb-2">
+
+<select id="dateFilter"
+class="form-control">
+
+<option value="">All Dates</option>
+<option value="today">Today</option>
+<option value="week">Last 7 days</option>
+<option value="month">Last 30 days</option>
+
+</select>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<!-- ================= TABLE ================= -->
+
+<div class="card border-0 shadow-sm" style="border-radius:12px;">
+
+<div class="table-responsive">
+
+<table class="table align-middle text-center mb-0">
+
+<thead style="background:#f1f5f9;">
+
+<tr style="font-size:16px;color:#000;font-weight:600;white-space:nowrap;">
+
+<th>Unit ID</th>
+<th>QR</th>
+<th>Scratch</th>
+<th>Status</th>
+<th>Created</th>
+<th>Actions</th>
+
+</tr>
+
+</thead>
+
+<tbody id="unitTable">
+
+{% for unit in units %}
+
+<tr
+data-status="{{ 'used' if unit.owner_username else 'unused' }}"
+data-owner="{{ 'claimed' if unit.owner_username else 'unclaimed' }}"
+data-date="{{ unit.created_at.strftime('%Y-%m-%d') if unit.created_at else '' }}"
+>
+
+<!-- Unit ID -->
+<td>
+{{ unit.unit_id }}
+</td>
+
+<!-- QR -->
+<td>
+
+<a href="{{ url_for('static', filename=unit.qr_code) }}" target="_blank">
+
+<img src="{{ url_for('static', filename=unit.qr_code) }}"
+style="width:55px;border-radius:6px;border:1px solid #ddd;padding:3px;">
+
+</a>
+
+</td>
+
+<!-- Scratch -->
+<td>
+{{ unit.scratch_plain }}
+</td>
+
+
+<!-- STATUS WITH OWNER -->
+
+<td>
+
+{% if unit.owner_username %}
+
+<span style="color:#dc2626;font-weight:600;">
+Used
+</span>
+
+<br>
+
+<small style="color:#64748b;font-weight:500;">
+Owned by: {{ unit.owner_username }}
+</small>
+
+{% else %}
+
+<span style="color:#16a34a;font-weight:600;">
+Unused
+</span>
+
+{% endif %}
+
+</td>
+
+
+<!-- Created Date -->
+
+<td>
+
+{% if unit.created_at %}
+
+{{ unit.created_at.strftime("%d %b %Y") }}
+
+<br>
+
+<small>
+{{ unit.created_at.strftime("%I:%M %p") }}
+</small>
+
+{% else %}
+
+-
+
+{% endif %}
+
+</td>
+
+
+<!-- Actions -->
+
+<td>
+
+<a href="/manufacturer/unit-logs/{{ unit.unit_id }}"
+class="btn btn-sm btn-primary">
+Logs
+</a>
+
+{% if not unit.owner_username %}
+<button
+class="btn btn-sm btn-danger"
+data-bs-toggle="modal"
+data-bs-target="#confirmModal"
+data-url="/manufacturer/delete-unit/{{ unit.unit_id }}">
+Delete
+</button>
+{% else %}
+<span class="text-muted small">Owned — cannot delete</span>
+{% endif %}
+
+</td>
+
+</tr>
+
+{% else %}
+
+<tr>
+
+<td colspan="6" class="text-muted py-4">
+No units found
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function(){
+
+const searchInput =
+document.getElementById("searchInput");
+
+const statusFilter =
+document.getElementById("statusFilter");
+
+const ownershipFilter =
+document.getElementById("ownershipFilter");
+
+const dateFilter =
+document.getElementById("dateFilter");
+
+function filterUnits(){
+
+let search =
+searchInput.value.toLowerCase();
+
+let status =
+statusFilter.value;
+
+let ownership =
+ownershipFilter.value;
+
+let date =
+dateFilter.value;
+
+let rows =
+document.querySelectorAll("#unitTable tr");
+
+rows.forEach(row=>{
+
+let text =
+row.innerText.toLowerCase();
+
+let rowStatus =
+row.dataset.status;
+
+let rowOwner =
+row.dataset.owner;
+
+let rowDate =
+row.dataset.date;
+
+let matchSearch =
+text.includes(search);
+
+let matchStatus =
+!status || rowStatus === status;
+
+let matchOwnership =
+!ownership || rowOwner === ownership;
+
+let matchDate = true;
+
+if(date){
+
+let today = new Date();
+
+let unitDate =
+new Date(rowDate);
+
+let diffDays =
+(today - unitDate) /
+(1000*60*60*24);
+
+if(date === "today")
+matchDate = diffDays < 1;
+
+else if(date === "week")
+matchDate = diffDays <= 7;
+
+else if(date === "month")
+matchDate = diffDays <= 30;
+
+}
+
+row.style.display =
+(matchSearch &&
+matchStatus &&
+matchOwnership &&
+matchDate)
+? ""
+: "none";
+
+});
+
+}
+
+searchInput.addEventListener(
+"keyup", filterUnits);
+
+statusFilter.addEventListener(
+"change", filterUnits);
+
+ownershipFilter.addEventListener(
+"change", filterUnits);
+
+dateFilter.addEventListener(
+"change", filterUnits);
+
+});
+
+</script>
+<script>
+
+document.addEventListener("DOMContentLoaded", function(){
+
+const confirmModal =
+document.getElementById("confirmModal");
+
+const confirmForm =
+document.getElementById("confirmForm");
+
+const confirmText =
+document.getElementById("confirmModalText");
+
+confirmModal.addEventListener(
+"show.bs.modal",
+function(event){
+
+const button = event.relatedTarget;
+
+const url =
+button.getAttribute("data-url");
+
+confirmForm.action = url;
+
+const unitId =
+url.split("/").pop();
+
+confirmText.innerHTML =
+"Are you sure you want to delete Unit:<br><b>"
++ unitId +
+"</b><br><br>This action cannot be undone.";
+
+});
+
+});
+
+</script>
+{% endblock %}

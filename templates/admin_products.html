@@ -1,0 +1,240 @@
+{% extends "admin_layout.html" %}
+
+{% block admin_content %}
+
+<div class="admin-dashboard-wrapper mb-4">
+
+<div class="card border-0 shadow-lg" style="border-radius:14px;background:white;">
+
+<div class="card-body p-4 p-md-5">
+
+<!-- HEADER -->
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+
+<div>
+
+<h1 style="color:#0b2a6e;font-size:26px;font-weight:600;">
+Products
+</h1>
+
+<p style="color:#64748b;">
+Manage all manufacturer products
+</p>
+
+</div>
+
+<div>
+
+<a href="/admin/export-products-excel"
+class="btn btn-sm"
+style="background:#eeeeb5;border-radius:8px;">
+Export Excel
+</a>
+
+</div>
+
+</div>
+
+<div class="row mb-3">
+
+<div class="col-md-4 mb-2">
+<input type="text"
+id="searchProduct"
+class="form-control"
+placeholder="Search product, brand, manufacturer">
+</div>
+
+<div class="col-md-3 mb-2">
+<select id="brandFilter" class="form-control">
+<option value="">All Brands</option>
+{% set brands = [] %}
+{% for p in products %}
+{% if p.manufacturer_brand not in brands %}
+{% set _ = brands.append(p.manufacturer_brand) %}
+<option value="{{ p.manufacturer_brand }}">{{ p.manufacturer_brand }}</option>
+{% endif %}
+{% endfor %}
+</select>
+</div>
+
+</div>
+<!-- TABLE -->
+
+<div class="card border-0 shadow-sm" style="border-radius:12px;">
+
+<div class="table-responsive">
+
+<table class="table align-middle text-center mb-0">
+
+<thead style="background:#f1f5f9;">
+
+<tr>
+
+<th>Product ID</th>
+<th>Name</th>
+<th>Brand</th>
+<th>Manufacturer</th>
+<th>Transaction</th>
+<th>Quantity</th>
+<th>Date</th>
+<th>Units</th>
+<th>Logs</th>
+<th>Actions</th>
+
+</tr>
+
+</thead>
+
+<tbody id="productTable">
+
+{% for p in products %}
+
+<tr>
+
+<td>{{ p.product_id }}</td>
+
+<td>{{ p.name }}</td>
+
+<td>
+<span class="badge bg-dark">
+{{ p.manufacturer_brand }}
+</span>
+</td>
+
+<td>{{ p.manufacturer_name }}</td>
+
+<td style="max-width:200px;word-break:break-word;">
+{{ p.tx_hash }}
+</td>
+
+<td>{{ p.quantity }}</td>
+
+<td>
+
+{% if p.created_at_ist %}
+{{ p.created_at_ist.strftime("%d %b %Y") }}
+<br>
+<small>{{ p.created_at_ist.strftime("%I:%M %p") }}</small>
+{% endif %}
+
+</td>
+
+<!-- VIEW UNITS -->
+
+<td>
+
+<a href="/manufacturer/product-units/{{ p.product_id }}?admin=1"
+class="btn btn-sm"
+style="background:#0b2a6e;color:white;">
+
+View Units
+
+</a>
+
+</td>
+
+<!-- VIEW LOGS -->
+
+<td>
+
+<a href="/manufacturer/product-logs/{{ p.product_id }}?admin=1"
+class="btn btn-sm btn-info">
+
+Logs
+
+</a>
+
+</td>
+
+<!-- DELETE -->
+
+<td>
+
+<button
+class="btn btn-sm btn-danger"
+data-url="/manufacturer/delete/{{ p.product_id }}"
+data-bs-toggle="modal"
+data-bs-target="#confirmModal">
+
+Delete
+
+</button>
+
+</td>
+
+</tr>
+
+{% else %}
+
+<tr>
+<td colspan="10" class="text-muted py-4">
+No products found
+</td>
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<script>
+
+document.addEventListener("DOMContentLoaded", function(){
+
+const searchProduct = document.getElementById("searchProduct");
+const brandFilter = document.getElementById("brandFilter");
+const tableRows = document.querySelectorAll("#productTable tr");
+
+function filterProducts(){
+
+let search = searchProduct.value.toLowerCase().trim();
+let brand = brandFilter.value.toLowerCase().trim();
+
+tableRows.forEach(row=>{
+
+let productId = row.cells[0].innerText.toLowerCase();
+let name = row.cells[1].innerText.toLowerCase();
+let brandText = row.cells[2].innerText.toLowerCase();
+let manufacturer = row.cells[3].innerText.toLowerCase();
+
+let matchSearch =
+productId.includes(search) ||
+name.includes(search) ||
+brandText.includes(search) ||
+manufacturer.includes(search);
+
+let matchBrand =
+!brand || brandText === brand;
+
+if(matchSearch && matchBrand){
+
+row.style.display="";
+
+}else{
+
+row.style.display="none";
+
+}
+
+});
+
+}
+
+searchProduct.addEventListener("keyup", filterProducts);
+brandFilter.addEventListener("change", filterProducts);
+
+});
+
+</script>
+{% endblock %}

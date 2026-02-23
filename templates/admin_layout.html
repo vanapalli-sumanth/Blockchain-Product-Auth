@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+
+/* REMOVE default body spacing */
+body{
+margin:0;
+padding:0;
+background:#f8fafc;
+}
+
+/* FULL WIDTH LAYOUT */
+.admin-container{
+display:flex;
+width:100%;
+min-height:calc(100vh - 80px);
+}
+
+/* SIDEBAR */
+.admin-sidebar{
+width:240px;
+min-width:240px;
+background:#0b2a6e;
+color:white;
+padding:20px;
+}
+
+/* CONTENT AREA */
+.admin-content{
+flex:1;
+padding:30px;
+background:#f8fafc;
+width:100%;
+}
+
+/* REMOVE container gap */
+.admin-content > .container,
+.admin-content > .container-fluid{
+max-width:100%;
+padding-left:0;
+padding-right:0;
+margin:0;
+}
+
+.admin-dashboard-wrapper{
+width:100%;
+max-width:100%;
+padding:0;
+margin:0;
+}
+
+/* SIDEBAR TITLE */
+.admin-title{
+color:white;
+font-weight:600;
+font-size:20px;
+margin-bottom:20px;
+}
+
+/* MENU */
+.admin-menu{
+display:block;
+color:white !important;
+text-decoration:none !important;
+font-weight:600;
+font-size:16px;
+padding:10px 12px;
+border-radius:8px;
+margin-bottom:6px;
+transition:0.2s;
+}
+
+.admin-menu:hover{
+background:rgba(255,255,255,0.15);
+}
+
+.admin-menu.active{
+background:white;
+color:#0b2a6e !important;
+}
+
+/* MOBILE */
+@media (max-width:768px){
+
+.admin-container{
+flex-direction:column;
+}
+
+.admin-sidebar{
+width:100%;
+display:flex;
+flex-direction:row;
+overflow-x:auto;
+gap:10px;
+}
+
+.admin-sidebar h5{
+display:none;
+}
+
+.admin-sidebar a{
+white-space:nowrap;
+background:rgba(255,255,255,0.1);
+}
+
+.admin-content{
+padding:15px;
+}
+
+}
+
+</style>
+
+
+<div class="admin-container">
+
+<!-- SIDEBAR -->
+
+<div class="admin-sidebar">
+
+<h5 class="admin-title">
+<i class="fa-solid fa-user-shield me-2"></i>
+Admin Panel
+</h5>
+
+<a href="/admin/dashboard" class="admin-menu">
+<i class="fa-solid fa-chart-line me-2"></i> Dashboard
+</a>
+
+<a href="/admin/manufacturers" class="admin-menu">
+<i class="fa-solid fa-industry me-2"></i> Manufacturers
+</a>
+
+<a href="/admin/customers" class="admin-menu">
+<i class="fa-solid fa-users me-2"></i> Customers
+</a>
+
+<a href="/admin/products" class="admin-menu">
+<i class="fa-solid fa-box me-2"></i> Products
+</a>
+
+<a href="/admin/logs" class="admin-menu">
+<i class="fa-solid fa-clipboard-list me-2"></i> Logs
+</a>
+
+</div>
+
+
+<!-- CONTENT -->
+
+<div class="admin-content">
+
+{% block admin_content %}{% endblock %}
+
+</div>
+
+</div>
+
+
+
+<!-- CONFIRM MODAL -->
+<div class="modal fade" id="confirmModal" tabindex="-1">
+
+<div class="modal-dialog modal-dialog-centered">
+
+<div class="modal-content">
+
+<div class="modal-header">
+
+<h5 class="modal-title">
+<i class="fa-solid fa-triangle-exclamation text-warning me-2"></i>
+Confirm Action
+</h5>
+
+<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+
+</div>
+
+<div class="modal-body">
+
+<i class="fa-solid fa-circle-info text-primary me-2"></i>
+
+Are you sure you want to perform this action?
+
+</div>
+
+<div class="modal-footer">
+
+<button class="btn btn-secondary"
+data-bs-dismiss="modal">
+Cancel
+</button>
+
+<form id="confirmForm" method="POST">
+
+<button type="submit"
+class="btn btn-danger">
+
+<i class="fa-solid fa-check me-1"></i>
+Confirm
+
+</button>
+
+</form>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<script>
+
+let confirmModal = document.getElementById("confirmModal");
+
+confirmModal.addEventListener("show.bs.modal", function (event) {
+
+let button = event.relatedTarget;
+
+let url = button.getAttribute("data-url");
+
+document.getElementById("confirmForm").action = url;
+
+});
+
+</script>
+
+
+{% endblock %}

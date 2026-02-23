@@ -1,0 +1,300 @@
+{% extends "admin_layout.html" %}
+
+{% block admin_content %}
+
+<div class="admin-dashboard-wrapper mb-4">
+
+<div class="card border-0 shadow-lg" style="border-radius:14px;background:white;">
+
+<div class="card-body p-4 p-md-5">
+
+<!-- HEADER -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+
+<div>
+
+<h1 style="color:#0b2a6e;font-size:26px;font-weight:600;margin-bottom:6px;">
+Manufacturers
+</h1>
+
+<p style="font-size:15px;color:#64748b;margin:0;">
+Manage manufacturer accounts, approvals, and credibility
+</p>
+
+</div>
+
+<div>
+<a href="/admin/export-manufacturers-excel"
+class="btn btn-sm"
+style="background:#eeeeb5;border-radius:8px;font-weight:500;">
+Export Excel
+</a>
+</div>
+
+</div>
+<!-- SEARCH + FILTER -->
+<div class="row mb-3">
+
+<div class="col-md-4 mb-2">
+<input type="text"
+id="searchManufacturer"
+class="form-control"
+placeholder="Search username, name, email">
+</div>
+
+<div class="col-md-3 mb-2">
+<select id="statusFilter" class="form-control">
+<option value="">All Status</option>
+<option value="active">Active</option>
+<option value="blocked">Blocked</option>
+</select>
+</div>
+
+<div class="col-md-3 mb-2">
+<select id="approvalFilter" class="form-control">
+<option value="">All Approval</option>
+<option value="approved">Approved</option>
+<option value="pending">Pending</option>
+</select>
+</div>
+
+</div>
+
+<!-- TABLE -->
+<div class="card border-0 shadow-sm" style="border-radius:12px;">
+
+<div class="table-responsive">
+
+<table class="table align-middle text-center mb-0">
+
+<thead style="background:#f1f5f9;">
+
+<tr style="font-weight:600;color:#000;white-space:nowrap;">
+
+<th>Username</th>
+<th>Full Name</th>
+<th>Email</th>
+<th>Created</th>
+<th>Status</th>
+<th>Approval</th>
+<th>Credibility</th>
+<th>Actions</th>
+
+</tr>
+
+</thead>
+
+<tbody id="manufacturerTable">
+
+{% for m in manufacturers %}
+
+<tr 
+data-status="{{ 'active' if m.is_active else 'blocked' }}"
+data-approval="{{ 'approved' if m.is_approved else 'pending' }}"
+>
+
+<td>{{ m.username }}</td>
+
+<td>{{ m.full_name }}</td>
+
+<td>{{ m.email }}</td>
+
+<td>
+
+{% if m.created_at_ist %}
+{{ m.created_at_ist.strftime("%d %b %Y") }}
+<br>
+<small>
+{{ m.created_at_ist.strftime("%I:%M %p") }}
+</small>
+{% endif %}
+</td>
+
+
+<!-- ACTIVE / BLOCKED -->
+<td>
+
+{% if m.is_active %}
+<span class="badge bg-success">Active</span>
+{% else %}
+<span class="badge bg-danger">Blocked</span>
+{% endif %}
+
+</td>
+
+
+<!-- APPROVAL -->
+<td>
+
+{% if m.is_approved %}
+<span class="badge bg-primary">Approved</span>
+{% else %}
+<span class="badge bg-warning text-dark">Pending</span>
+{% endif %}
+
+</td>
+
+
+<!-- CREDIBILITY -->
+<td>
+
+{% set score = m.credibility_score if m.credibility_score else 100 %}
+
+{% if score >= 80 %}
+<span class="badge bg-success">{{ score }}%</span>
+
+{% elif score >= 50 %}
+<span class="badge bg-warning text-dark">{{ score }}%</span>
+
+{% else %}
+<span class="badge bg-danger">{{ score }}%</span>
+
+{% endif %}
+
+</td>
+
+
+<!-- ACTIONS -->
+<td class="text-nowrap">
+
+<!-- VIEW PRODUCTS -->
+<a href="/admin/view-manufacturer/{{ m.username }}"
+class="btn btn-sm btn-info">
+View Products
+</a>
+
+
+<!-- APPROVE -->
+{% if not m.is_approved %}
+<button class="btn btn-sm btn-success"
+data-url="/admin/approve-manufacturer/{{ m.username }}"
+data-bs-toggle="modal"
+data-bs-target="#confirmModal">
+Approve
+</button>
+{% endif %}
+
+
+<!-- REJECT -->
+{% if not m.is_approved %}
+<button class="btn btn-sm btn-danger"
+data-url="/admin/reject-manufacturer/{{ m.username }}"
+data-bs-toggle="modal"
+data-bs-target="#confirmModal">
+Reject
+</button>
+{% endif %}
+
+
+<!-- BLOCK -->
+{% if m.is_active %}
+<button class="btn btn-sm btn-warning"
+data-url="/admin/block-user/{{ m.username }}"
+data-bs-toggle="modal"
+data-bs-target="#confirmModal">
+Block
+</button>
+{% endif %}
+
+
+<!-- UNBLOCK -->
+{% if not m.is_active %}
+<button class="btn btn-sm btn-secondary"
+data-url="/admin/unblock-user/{{ m.username }}"
+data-bs-toggle="modal"
+data-bs-target="#confirmModal">
+Unblock
+</button>
+{% endif %}
+
+
+<!-- DELETE -->
+<button class="btn btn-sm btn-dark"
+data-url="/admin/delete-user/{{ m.username }}"
+data-bs-toggle="modal"
+data-bs-target="#confirmModal">
+Delete
+</button>
+
+</td>
+
+</tr>
+
+{% else %}
+
+<tr>
+
+<td colspan="8" class="text-muted py-4">
+No manufacturers found
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<script>
+
+document.addEventListener("DOMContentLoaded", function(){
+
+const searchInput = document.getElementById("searchManufacturer");
+const statusFilter = document.getElementById("statusFilter");
+const approvalFilter = document.getElementById("approvalFilter");
+
+function filterManufacturers(){
+
+let search = searchInput.value.toLowerCase();
+let status = statusFilter.value;
+let approval = approvalFilter.value;
+
+let rows = document.querySelectorAll("#manufacturerTable tr");
+
+rows.forEach(row=>{
+
+let username = row.cells[0].innerText.toLowerCase();
+let fullname = row.cells[1].innerText.toLowerCase();
+let email = row.cells[2].innerText.toLowerCase();
+
+let rowStatus = row.dataset.status;
+let rowApproval = row.dataset.approval;
+
+let matchSearch =
+username.includes(search) ||
+fullname.includes(search) ||
+email.includes(search);
+
+let matchStatus =
+!status || rowStatus === status;
+
+let matchApproval =
+!approval || rowApproval === approval;
+
+row.style.display =
+(matchSearch && matchStatus && matchApproval)
+? ""
+: "none";
+
+});
+
+}
+
+searchInput.addEventListener("keyup", filterManufacturers);
+statusFilter.addEventListener("change", filterManufacturers);
+approvalFilter.addEventListener("change", filterManufacturers);
+
+});
+
+</script>
+{% endblock %}

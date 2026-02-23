@@ -4,18 +4,15 @@
 {% block content %}
 
 <section class="verify-section">
-
 <div class="container">
-
 <div class="row justify-content-center">
-
 <div class="col-lg-5 col-md-7">
 
 <div class="verify-card">
 
 {% if stage == "scan" %}
 
-<!-- HEADER -->
+<!-- ================= SCAN STAGE ================= -->
 
 <div class="verify-header text-center">
 
@@ -26,39 +23,80 @@
 <h3>Scan Product QR Code</h3>
 
 <p class="text-muted">
-Align the QR code within the frame to verify authenticity
+Align the QR code within the frame
 </p>
 
 </div>
 
-
-<!-- QR SCANNER BOX -->
-
 <div id="qr-reader" class="qr-box"></div>
 
-
-<!-- BLOCKCHAIN LOADER -->
-
 <div id="verification-loading"
-class="verification-loader d-none">
+class="verification-loader d-none text-center">
 
 <div class="spinner-border text-primary"></div>
 
 <h5 class="mt-3">
-Verifying on Blockchain...
+Verifying Product...
 </h5>
 
 <p class="text-muted small">
-Checking secure authenticity records
+Getting secure blockchain data & GPS location
 </p>
 
 </div>
 
+{% elif stage == "scratch" %}
+
+<!-- ================= SCRATCH STAGE ================= -->
+
+<div class="text-center">
+
+<div class="verify-icon mb-3">
+<i class="fa-solid fa-location-crosshairs"></i>
+</div>
+
+<h4>Enable Location & Enter Scratch Code</h4>
+
+<p class="text-muted">
+Location is required for secure verification
+</p>
+
+<form method="POST"
+action="/verify-scratch"
+onsubmit="return checkLocationReady()">
+
+<input type="hidden" name="lat" id="lat">
+<input type="hidden" name="lon" id="lon">
+
+<input type="text"
+name="scratch_code"
+class="form-control mt-3"
+placeholder="Enter scratch code"
+required>
+
+<button class="btn btn-dark w-100 mt-3"
+id="verifyBtn"
+disabled>
+
+Enable Location First
+
+</button>
+
+</form>
+
+<div class="alert alert-warning mt-3"
+id="locationAlert">
+
+<i class="fa-solid fa-location-crosshairs"></i>
+Detecting your GPS location...
+
+</div>
+
+</div>
 
 {% elif stage == "result" %}
 
-
-<!-- RESULT SECTION -->
+<!-- ================= RESULT STAGE ================= -->
 
 <div class="text-center">
 
@@ -72,18 +110,39 @@ Checking secure authenticity records
 Genuine Product
 </h4>
 
-<div class="result-box">
+{% if first_scan %}
 
-<div class="result-row">
-<span>Product ID</span>
-<span>{{ product.product_id }}</span>
+<div class="alert alert-success mt-3">
+You are now the owner of this product
+</div>
+{% endif %}
+
+{% elif status == "already_verified" %}
+
+<div class="result-icon info">
+<i class="fa-solid fa-circle-info"></i>
 </div>
 
-<div class="result-row">
-<span>Manufacturer</span>
-<span>{{ product.manufacturer }}</span>
+<h4 class="text-primary">
+Already Verified
+</h4>
+
+<div class="alert alert-info mt-3">
+You already own this product
 </div>
 
+{% elif status == "duplicate" %}
+
+<div class="result-icon danger">
+<i class="fa-solid fa-triangle-exclamation"></i>
+</div>
+
+<h4 class="text-danger">
+Duplicate Product
+</h4>
+
+<div class="alert alert-danger mt-3">
+Owned by {{ owner }}
 </div>
 
 {% else %}
@@ -93,40 +152,135 @@ Genuine Product
 </div>
 
 <h4 class="text-danger">
-Fake Product Detected
+Fake Product
 </h4>
 
 <p class="text-muted">
-This product is not registered on blockchain
+Invalid or unregistered product
 </p>
 
 {% endif %}
 
+<!-- PRODUCT DETAILS -->
+
+{% if product and unit %}
+
+<div class="result-box mt-4 text-start">
+
+<div class="result-row">
+<span>Product ID</span>
+<span>{{ product.product_id }}</span>
+</div>
+
+<div class="result-row">
+<span>Product Name</span>
+<span>{{ product.name }}</span>
+</div>
+
+<div class="result-row">
+<span>Unit ID</span>
+<span>{{ unit.unit_id }}</span>
+</div>
+
+<div class="result-row">
+<span>Manufacturer</span>
+<span>{{ product.manufacturer_name }}</span>
+</div>
+
+<div class="result-row">
+<span>Brand</span>
+<span>{{ product.manufacturer_brand }}</span>
+</div>
+
+<div class="result-row">
+<span>Added Date</span>
+<span>
+{% if created_at_ist %}
+{{ created_at_ist.strftime("%d %b %Y %I:%M %p") }}
+{% endif %}
+</span>
+</div>
+
+<div class="result-row">
+<span>Scratch Code</span>
+<span>{{ unit.scratch_plain }}</span>
+</div>
+
+<!-- OWNER INFO -->
+
+<div class="result-row">
+<span>Owner</span>
+<span>
+{{ owner if owner else "Not claimed" }}
+</span>
+</div>
+
+{% if owner %}
+
+<div class="result-row">
+<span>Owned Location</span>
+<span>
+{{ owner_location if owner_location else "Unknown" }}
+</span>
+</div>
+
+<div class="result-row">
+<span>Owned IP Address</span>
+<span>
+{{ owner_ip if owner_ip else "Unknown" }}
+</span>
+</div>
+
+<div class="result-row">
+<span>Owned Date</span>
+<span>
+{% if owned_at_ist %}
+{{ owned_at_ist.strftime("%d %b %Y %I:%M %p") }}
+{% else %}
+Unknown
+{% endif %}
+</span>
+</div>
+
+{% endif %}
+
+<!-- SCANNER INFO (ALWAYS SHOW) -->
+
+<div class="result-row">
+<span>Scanned Location</span>
+<span>
+{{ scanner_location if scanner_location else "Unknown" }}
+</span>
+</div>
+
+<div class="result-row">
+<span>Scanned IP Address</span>
+<span>
+{{ scanner_ip if scanner_ip else "Unknown" }}
+</span>
+</div>
+
+{% endif %}
 
 <a href="/verify"
 class="btn btn-dark w-100 mt-4">
 
-<i class="fa-solid fa-rotate-right me-2"></i>
 Scan Another Product
 
 </a>
 
 </div>
 
-
 {% endif %}
 
 </div>
-
 </div>
-
 </div>
-
 </div>
-
+</div>
 </section>
 
-
+<!-- ================= QR SCANNER ================= -->
 
 {% if stage == "scan" %}
 
@@ -137,27 +291,139 @@ Scan Another Product
 const scanner = new Html5Qrcode("qr-reader");
 
 scanner.start(
-    { facingMode: "environment" },
-    { fps: 10, qrbox: 250 },
-    (decodedText) => {
+{ facingMode: "environment" },
+{ fps: 10, qrbox: 250 },
 
-        scanner.stop().then(() => {
+function(decodedText){
 
-            document.getElementById("qr-reader").style.display = "none";
+scanner.stop();
 
-            document.getElementById("verification-loading")
-                .classList.remove("d-none");
+document.getElementById("qr-reader").style.display="none";
 
-            setTimeout(() => {
+document.getElementById("verification-loading")
+.classList.remove("d-none");
 
-                window.location.href = decodedText;
+if (navigator.geolocation){
 
-            }, 1200);
+navigator.geolocation.getCurrentPosition(
 
-        });
+function(position){
 
-    }
+const lat = position.coords.latitude;
+const lon = position.coords.longitude;
+
+let separator =
+decodedText.includes("?") ? "&" : "?";
+
+window.location.href =
+decodedText +
+separator +
+"lat=" + lat +
+"&lon=" + lon;
+
+},
+
+function(){
+
+alert("Please enable location for accurate verification");
+window.location.href = decodedText;
+
+},
+
+{
+enableHighAccuracy:true,
+timeout:10000,
+maximumAge:0
+}
+
 );
+
+}
+else{
+
+alert("Geolocation not supported");
+window.location.href = decodedText;
+
+}
+
+}
+
+);
+
+</script>
+
+{% endif %}
+
+<!-- ================= SCRATCH GPS ================= -->
+
+{% if stage == "scratch" %}
+
+<script>
+
+let locationReady = false;
+
+function checkLocationReady(){
+
+if(!locationReady){
+
+alert("Please enable location");
+
+return false;
+
+}
+
+return true;
+
+}
+
+if(navigator.geolocation){
+
+navigator.geolocation.getCurrentPosition(
+
+function(position){
+
+document.getElementById("lat").value =
+position.coords.latitude;
+
+document.getElementById("lon").value =
+position.coords.longitude;
+
+locationReady = true;
+
+document.getElementById("verifyBtn").disabled=false;
+
+document.getElementById("verifyBtn").innerHTML=
+"Verify Product";
+
+document.getElementById("locationAlert").className=
+"alert alert-success mt-3";
+
+document.getElementById("locationAlert").innerHTML=
+"Location detected successfully";
+
+},
+
+function(){
+
+locationReady=false;
+
+document.getElementById("locationAlert").className=
+"alert alert-danger mt-3";
+
+document.getElementById("locationAlert").innerHTML=
+"Please enable GPS location";
+
+},
+
+{
+enableHighAccuracy:true,
+timeout:10000,
+maximumAge:0
+}
+
+);
+
+}
 
 </script>
 

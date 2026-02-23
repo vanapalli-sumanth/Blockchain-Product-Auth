@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}Product Created | BlockAuth{% endblock %}
+
+{% block content %}
+
+<div class="container" style="margin-top:120px; margin-bottom:120px;">
+
+<div class="row justify-content-center">
+
+<div class="col-md-6 col-lg-5">
+
+<div class="card border-0 shadow-lg text-center">
+
+<div class="card-body p-5">
+
+<!-- GREEN TICK ICON -->
+<div class="mb-4">
+
+<div class="icon-circle">
+
+<i class="fa-solid fa-check"></i>
+
+</div>
+
+</div>
+
+<!-- TITLE -->
+<h3 class="fw-bold mb-2" style="color:#0b2a6e;">
+Product Registered Successfully
+</h3>
+
+<p class="text-muted mb-4">
+Your product has been securely registered on blockchain
+</p>
+
+<!-- DETAILS BOX -->
+<div class="details-box text-start mb-4">
+
+<div class="detail-row">
+<span>Product ID</span>
+<span class="fw-semibold" style="color:#0b2a6e;">
+{{ product_id }}
+</span>
+</div>
+
+<div class="detail-row">
+<span>Manufacturer</span>
+<span class="fw-semibold">
+{{ session.get("full_name") }}
+</span>
+</div>
+
+<div class="detail-row">
+<span>Total Units</span>
+<span class="fw-semibold">
+{{ units|length }}
+</span>
+</div>
+
+<div class="detail-row">
+<span>Created Date</span>
+<span class="fw-semibold">
+{{ created_at }}
+</span>
+</div>
+
+</div>
+
+<!-- BUTTON -->
+<a href="/manufacturer/dashboard"
+class="btn w-100 py-2 fw-semibold text-white"
+style="background:#0b2a6e; border:none;">
+
+Go to Dashboard
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<style>
+
+/* Green Tick Circle */
+.icon-circle{
+width:75px;
+height:75px;
+background:#198754;
+color:white;
+font-size:34px;
+display:flex;
+align-items:center;
+justify-content:center;
+border-radius:50%;
+margin:auto;
+box-shadow:0 4px 15px rgba(0,0,0,0.2);
+}
+
+/* Details Box */
+.details-box{
+background:#f8f9fa;
+border-radius:12px;
+padding:18px;
+border-left:5px solid #0b2a6e;
+}
+
+.detail-row{
+display:flex;
+justify-content:space-between;
+padding:10px 0;
+border-bottom:1px solid #e9ecef;
+font-size:15px;
+}
+
+.detail-row:last-child{
+border-bottom:none;
+}
+
+</style>
+
+{% endblock %}

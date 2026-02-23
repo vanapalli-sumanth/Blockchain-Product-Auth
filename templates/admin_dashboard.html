@@ -1,1078 +1,339 @@
-{% extends "base.html" %}
-{% block title %}Admin Dashboard | BlockAuth{% endblock %}
+{% extends "admin_layout.html" %}
 
-{% block content %}
-<style>
+{% block admin_content %}
 
-/* Mobile responsive tabs */
-.mobile-tabs {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    overflow-y: hidden;
-}
-
-.mobile-tabs .nav-link {
-    white-space: nowrap;
-}
-
-/* Optional: smooth scroll */
-.mobile-tabs::-webkit-scrollbar {
-    height: 4px;
-}
-
-.mobile-tabs::-webkit-scrollbar-thumb {
-    background: #0b2a6e;
-    border-radius: 10px;
-}
-
-</style>
-
-<div class="container mt-5 mb-5">
-
-
-<!-- ================= BIG BACKGROUND CARD ================= -->
-
-<div class="card border-0 shadow-lg">
+<div class="admin-dashboard-wrapper mb-4">
+<!-- MAIN CARD -->
+<div class="card border-0 shadow-lg" style="border-radius:14px; background:white;">
 
 <div class="card-body p-4 p-md-5">
 
+<!-- HEADER -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
 
-<!-- ================= HEADER ================= -->
+<div>
 
-<div class="mb-4">
-
-<h2 class="fw-bold mb-1" style="color:#0b2a6e;">
+<h1 style="
+color:#0b2a6e;
+font-size:28px;
+font-weight:600;
+margin-bottom:6px;
+">
 Admin Dashboard
-</h2>
+</h1>
 
-<p class="text-muted mb-0">
-Monitor users, products, blockchain verification, and system analytics
+<p style="
+font-size:18px;
+font-weight:500;
+margin:0;
+">
+
+<span style="color:#64748b;">
+Administrator:
+</span>
+
+<span style="font-weight:600;">
+{{ session.full_name }}
+</span>
+
+</p>
+
+<p style="
+font-size:15px;
+color:#64748b;
+margin-top:3px;
+">
+Monitor system activity, products, and manufacturer credibility
 </p>
 
 </div>
 
-
-
-<!-- ================= STATISTICS CARDS ================= -->
-
-<div class="row mb-4">
-
-<div class="col-md-3 mb-3">
-<div class="card border-0 shadow-sm text-center h-100">
-<div class="card-body">
-
-<i class="fa-solid fa-industry fa-2x mb-2 text-primary"></i>
-
-<h6 class="text-muted">Manufacturers</h6>
-
-<h3 class="fw-bold text-primary">
-{{ manufacturers|length }}
-</h3>
-
-</div>
-</div>
-</div>
-
-
-<div class="col-md-3 mb-3">
-<div class="card border-0 shadow-sm text-center h-100">
-<div class="card-body">
-
-<i class="fa-solid fa-users fa-2x mb-2 text-success"></i>
-
-<h6 class="text-muted">Customers</h6>
-
-<h3 class="fw-bold text-success">
-{{ customers|length }}
-</h3>
-
-</div>
-</div>
-</div>
-
-
-<div class="col-md-3 mb-3">
-<div class="card border-0 shadow-sm text-center h-100">
-<div class="card-body">
-
-<i class="fa-solid fa-box fa-2x mb-2" style="color:#0b2a6e;"></i>
-
-<h6 class="text-muted">Products</h6>
-
-<h3 class="fw-bold">
-{{ products|length }}
-</h3>
-
-</div>
-</div>
-</div>
-
-
-<div class="col-md-3 mb-3">
-<div class="card border-0 shadow-sm text-center h-100">
-<div class="card-body">
-
-<i class="fa-solid fa-triangle-exclamation fa-2x mb-2 text-danger"></i>
-
-<h6 class="text-muted">Fake Detection Rate</h6>
-
-{% set fake_count = logs | selectattr("status","equalto","fake") | list | length %}
-{% set total_logs = logs | length %}
-
-{% if total_logs > 0 %}
-<h3 class="fw-bold text-danger">
-{{ ((fake_count / total_logs) * 100) | round(1) }}%
-</h3>
-{% else %}
-<h3 class="fw-bold">0%</h3>
-{% endif %}
-
-</div>
-</div>
-</div>
-
 </div>
 
 
 
-<!-- ================= NAV TABS ================= -->
+<!-- STATS -->
+<div class="row g-3 mb-4">
 
-<ul class="nav nav-tabs mb-4 flex-nowrap overflow-auto mobile-tabs">
+<!-- Manufacturers -->
+<div class="col-lg-3 col-md-6 col-6">
 
-<li class="nav-item">
-<button class="nav-link active fw-semibold"
-data-bs-toggle="tab"
-data-bs-target="#manufacturers">
+<div class="card border-0 shadow-sm h-100"
+style="border-radius:10px; background:#f8fafc;">
 
-<i class="fa-solid fa-industry me-1"></i>
+<div class="card-body text-center py-3">
+
+<div style="
+font-size:15px;
+color:#64748b;
+font-weight:500;
+">
 Manufacturers
+</div>
 
-</button>
-</li>
+<div style="
+font-size:24px;
+font-weight:600;
+color:#000;
+">
+{{ manufacturers|length }}
+</div>
 
-<li class="nav-item">
-<button class="nav-link fw-semibold"
-data-bs-toggle="tab"
-data-bs-target="#customers">
+</div>
+</div>
+</div>
 
-<i class="fa-solid fa-users me-1"></i>
+
+<!-- Customers -->
+<div class="col-lg-3 col-md-6 col-6">
+
+<div class="card border-0 shadow-sm h-100"
+style="border-radius:10px; background:#f8fafc;">
+
+<div class="card-body text-center py-3">
+
+<div style="
+font-size:15px;
+color:#64748b;
+font-weight:500;
+">
 Customers
+</div>
 
-</button>
-</li>
+<div style="
+font-size:24px;
+font-weight:600;
+color:#000;
+">
+{{ customers|length }}
+</div>
 
-<li class="nav-item">
-<button class="nav-link fw-semibold"
-data-bs-toggle="tab"
-data-bs-target="#products">
+</div>
+</div>
+</div>
 
-<i class="fa-solid fa-box me-1"></i>
+
+<!-- Products -->
+<div class="col-lg-3 col-md-6 col-6">
+
+<div class="card border-0 shadow-sm h-100"
+style="border-radius:10px; background:#f8fafc;">
+
+<div class="card-body text-center py-3">
+
+<div style="
+font-size:15px;
+color:#64748b;
+font-weight:500;
+">
 Products
-
-</button>
-</li>
-
-<li class="nav-item">
-<button class="nav-link fw-semibold"
-data-bs-toggle="tab"
-data-bs-target="#logs">
-
-<i class="fa-solid fa-clock-rotate-left me-1"></i>
-Verification Logs
-
-</button>
-</li>
-
-</ul>
-
-<div class="tab-content">
-
-<!-- ================= MANUFACTURERS ================= -->
-
-<div class="tab-pane fade show active" id="manufacturers">
-
-<!-- Responsive Header -->
-<div class="row g-2 mb-3 align-items-center">
-
-<!-- Search -->
-<div class="col-12 col-md-5">
-<input type="text"
-id="manufacturerSearch"
-class="form-control"
-placeholder="Search manufacturers...">
 </div>
 
-<!-- Filter -->
-<div class="col-12 col-md-3">
-<select id="manufacturerFilter"
-class="form-select">
-
-<option value="">All Status</option>
-<option value="Active">Active</option>
-<option value="Blocked">Blocked</option>
-
-</select>
-</div>
-
-<!-- Buttons -->
-<div class="col-12 col-md-4">
-
-<div class="d-flex flex-wrap gap-2 justify-content-md-end">
-
-<a href="/admin/export-manufacturers-excel"
-class="btn btn-success">
-Export Excel
-</a>
-
-<a href="/admin/export-manufacturers-pdf"
-class="btn btn-danger">
-Export PDF
-</a>
-
+<div style="
+font-size:24px;
+font-weight:600;
+color:#000;
+">
+{{ products|length }}
 </div>
 
 </div>
-
+</div>
 </div>
 
-<!-- Responsive Table -->
-<div class="table-responsive">
 
-<table class="table table-bordered table-striped">
+<!-- Logs -->
+<div class="col-lg-3 col-md-6 col-6">
 
-<thead class="table-dark">
+<div class="card border-0 shadow-sm h-100"
+style="border-radius:10px; background:#f8fafc;">
 
-<tr>
-<th>Username</th>
-<th>Email</th>
-<th>Created At</th>
-<th>Status</th>
-<th>Credibility</th>
-<th>Actions</th>
-</tr>
+<div class="card-body text-center py-3">
 
-</thead>
+<div style="
+font-size:15px;
+color:#64748b;
+font-weight:500;
+">
+Total Verifications
+</div>
 
-<tbody>
-
-{% for m in manufacturers %}
-
-<tr>
-
-<td>{{ m.username }}</td>
-
-<td>{{ m.email }}</td>
-
-<td>
-{{ m.created_at_ist.strftime("%d %b %Y %I:%M %p") if m.created_at_ist }}
-</td>
-
-<td>
-
-{% if m.is_active %}
-<span class="badge bg-success">Active</span>
-{% else %}
-<span class="badge bg-danger">Blocked</span>
-{% endif %}
-
-</td>
-
-<td>
-<span class="badge bg-info">
-{{ m.credibility_score | default(100) }}%
-</span>
-</td>
-
-<td class="text-nowrap">
-
-<a href="/admin/manufacturer-products/{{ m.username }}"
-class="btn btn-sm btn-info">
-Products
-</a>
-
-{% if m.is_active %}
-<button
-class="btn btn-sm btn-warning confirm-btn"
-data-url="/admin/block-user/{{ m.username }}"
-data-bs-toggle="modal"
-data-bs-target="#confirmModal">
-Block
-</button>
-
-{% else %}
-<button
-class="btn btn-sm btn-success confirm-btn"
-data-url="/admin/unblock-user/{{ m.username }}"
-data-bs-toggle="modal"
-data-bs-target="#confirmModal">
-Unblock
-</button>
-{% endif %}
-
-<button
-class="btn btn-sm btn-danger confirm-btn"
-data-url="/admin/delete-user/{{ m.username }}"
-data-bs-toggle="modal"
-data-bs-target="#confirmModal">
-Delete
-</button>
-
-</td>
-
-</tr>
-
-{% endfor %}
-
-</tbody>
-
-</table>
-
+<div style="
+font-size:24px;
+font-weight:600;
+color:#000;
+">
+{{ logs|length }}
 </div>
 
 </div>
-<!-- ================= CUSTOMERS ================= -->
-
-<div class="tab-pane fade" id="customers">
-
-<!-- Responsive Header -->
-<div class="row g-2 mb-3 align-items-center">
-
-<!-- Search -->
-<div class="col-12 col-md-5">
-<input type="text"
-id="customerSearch"
-class="form-control"
-placeholder="Search customers...">
 </div>
-
-<!-- Filter -->
-<div class="col-12 col-md-3">
-<select id="customerFilter"
-class="form-select">
-
-<option value="">All Status</option>
-<option value="Active">Active</option>
-<option value="Blocked">Blocked</option>
-
-</select>
-</div>
-
-<!-- Buttons -->
-<div class="col-12 col-md-4">
-
-<div class="d-flex flex-wrap gap-2 justify-content-md-end">
-
-<a href="/admin/export-customers-excel"
-class="btn btn-success">
-Export Excel
-</a>
-
-<a href="/admin/export-customers-pdf"
-class="btn btn-danger">
-Export PDF
-</a>
-
-</div>
-
-</div>
-
-</div>
-
-<!-- Responsive Table -->
-<div class="table-responsive">
-
-<table class="table table-bordered table-striped">
-
-<thead class="table-dark">
-
-<tr>
-<th>Username</th>
-<th>Email</th>
-<th>Created At</th>
-<th>Status</th>
-<th>Credibility</th>
-<th>Actions</th>
-</tr>
-
-</thead>
-
-<tbody>
-
-{% for c in customers %}
-
-<tr>
-
-<td>{{ c.username }}</td>
-
-<td>{{ c.email }}</td>
-
-<td>
-{{ c.created_at_ist.strftime("%d %b %Y %I:%M %p") if c.created_at_ist }}
-</td>
-
-<td>
-
-{% if c.is_active %}
-<span class="badge bg-success">Active</span>
-{% else %}
-<span class="badge bg-danger">Blocked</span>
-{% endif %}
-
-</td>
-
-<td>
-
-<span class="badge bg-info">
-{{ c.credibility_score | default(100) }}%
-</span>
-
-</td>
-
-<td class="text-nowrap">
-
-{% if c.is_active %}
-<button
-class="btn btn-sm btn-warning confirm-btn"
-data-url="/admin/block-user/{{ c.username }}"
-data-bs-toggle="modal"
-data-bs-target="#confirmModal">
-Block
-</button>
-{% else %}
-<button
-class="btn btn-sm btn-warning confirm-btn"
-data-url="/admin/block-user/{{ c.username }}"
-data-bs-toggle="modal"
-data-bs-target="#confirmModal">
-Block
-</button>
-{% endif %}
-
-<button
-class="btn btn-sm btn-danger confirm-btn"
-data-url="/admin/delete-user/{{ c.username }}"
-data-bs-toggle="modal"
-data-bs-target="#confirmModal">
-Delete
-</button>
-
-</td>
-
-</tr>
-
-{% endfor %}
-
-</tbody>
-
-</table>
-
 </div>
 
 </div>
 
 
-<!-- ================= PRODUCTS ================= -->
 
-<!-- ================= PRODUCTS ================= -->
+<!-- CHARTS -->
+<div class="row g-3">
 
-<div class="tab-pane fade" id="products">
+<!-- PRODUCT CHART -->
+<div class="col-lg-6">
 
-<!-- Responsive Header -->
-<div class="row g-2 mb-3 align-items-center">
+<div class="card border-0 shadow-sm"
+style="border-radius:12px;">
 
-<!-- Search -->
-<div class="col-12 col-md-5">
-<input type="text"
-id="productSearch"
-class="form-control"
-placeholder="Search products...">
-</div>
+<div class="card-body">
 
-<!-- Filter -->
-<div class="col-12 col-md-3">
-<select id="productFilter"
-class="form-select">
-
-<option value="">All Status</option>
-<option value="Active">Active</option>
-<option value="Blocked">Blocked</option>
-
-</select>
-</div>
-
-<!-- Buttons -->
-<div class="col-12 col-md-4">
-
-<div class="d-flex flex-wrap gap-2 justify-content-md-end">
-
-<a href="/admin/export-products-excel"
-class="btn btn-success">
-Export Excel
-</a>
-
-<a href="/admin/export-products-pdf"
-class="btn btn-danger">
-Export PDF
-</a>
-
-</div>
-
-</div>
-
-</div>
-
-
-<!-- Filter Info Message -->
-{% if selected_manufacturer %}
-
-<div class="alert alert-info d-flex flex-wrap justify-content-between align-items-center gap-2">
-
-<div>
-Showing products of manufacturer:
-<strong>{{ selected_manufacturer }}</strong>
-</div>
-
-<a href="/admin/dashboard"
-class="btn btn-sm btn-dark">
-Show All Products
-</a>
-
-</div>
-
-{% endif %}
-
-
-<!-- Responsive Table -->
-<div class="table-responsive">
-
-<table class="table table-bordered table-striped">
-
-<thead class="table-dark">
-
-<tr>
-<th>Product ID</th>
-<th>Name</th>
-<th>Manufacturer</th>
-<th>Blockchain Tx Hash</th>
-<th>Added Date</th>
-<th>Status</th>
-<th>Credibility</th>
-<th>Actions</th>
-</tr>
-
-</thead>
-
-<tbody>
-
-{% for p in products %}
-
-<tr>
-
-<td>{{ p.product_id }}</td>
-
-<td>{{ p.name }}</td>
-
-<td>{{ p.manufacturer }}</td>
-
-<td style="max-width:200px;word-break:break-word;">
-{{ p.tx_hash }}
-</td>
-
-<td>
-{{ p.created_at_ist.strftime("%d %b %Y %I:%M %p") if p.created_at_ist }}
-</td>
-
-<td>
-
-{% if p.is_active %}
-<span class="badge bg-success">Active</span>
-{% else %}
-<span class="badge bg-danger">Blocked</span>
-{% endif %}
-
-</td>
-
-<td>
-
-{% set score = p.credibility_score | default(100) %}
-
-{% if score >= 80 %}
-<span class="badge bg-success">{{ score }}%</span>
-
-{% elif score >= 50 %}
-<span class="badge bg-warning">{{ score }}%</span>
-
-{% else %}
-<span class="badge bg-danger">{{ score }}%</span>
-
-{% endif %}
-
-</td>
-
-<td class="text-nowrap">
-
-{% if p.is_active %}
-<button
-class="btn btn-sm btn-warning confirm-btn"
-data-url="/admin/block-product/{{ p.product_id }}"
-data-bs-toggle="modal"
-data-bs-target="#confirmModal">
-Block
-</button>
-{% else %}
-<button
-class="btn btn-sm btn-success confirm-btn"
-data-url="/admin/unblock-product/{{ p.product_id }}"
-data-bs-toggle="modal"
-data-bs-target="#confirmModal">
-Unblock
-</button>
-{% endif %}
-
-<button
-class="btn btn-sm btn-danger confirm-btn"
-data-url="/admin/delete-product/{{ p.product_id }}"
-data-bs-toggle="modal"
-data-bs-target="#confirmModal">
-Delete
-</button>
-
-<a href="/admin/product-logs/{{ p.product_id }}"
-class="btn btn-sm btn-info">
-Logs
-</a>
-
-</td>
-
-</tr>
-
-{% endfor %}
-
-</tbody>
-
-</table>
-
-</div>
-
-</div>
-
-
-<!-- ================= LOGS ================= -->
-
-<div class="tab-pane fade" id="logs">
-
-<!-- Responsive Header -->
-<div class="row g-2 mb-3 align-items-center">
-
-<!-- Search -->
-<div class="col-12 col-md-5">
-<input type="text"
-id="logSearch"
-class="form-control"
-placeholder="Search logs...">
-</div>
-
-<!-- Filter -->
-<div class="col-12 col-md-3">
-<select id="logFilter"
-class="form-select">
-
-<option value="">All Results</option>
-<option value="Genuine">Genuine</option>
-<option value="Fake">Fake</option>
-
-</select>
-</div>
-
-<!-- Buttons -->
-<div class="col-12 col-md-4">
-
-<div class="d-flex flex-wrap gap-2 justify-content-md-end">
-
-<a href="/admin/export-logs-excel"
-class="btn btn-success">
-Export Excel
-</a>
-
-<a href="/admin/export-logs-pdf"
-class="btn btn-danger">
-Export PDF
-</a>
-
-</div>
-
-</div>
-
-</div>
-
-
-<!-- Responsive Table -->
-<div class="table-responsive">
-
-<table class="table table-bordered table-striped">
-
-<thead class="table-dark">
-
-<tr>
-<th>Product ID</th>
-<th>Username</th>
-<th>Original Blockchain Hash</th>
-<th>Scanned Blockchain Hash</th>
-<th>Status</th>
-<th>Date</th>
-</tr>
-
-</thead>
-
-<tbody>
-
-{% for log in logs %}
-
-<tr>
-
-<td>{{ log.scanned_product_id }}</td>
-
-<td>{{ log.username }}</td>
-
-<td style="max-width:200px;word-break:break-word;">
-{{ log.original_blockchain_tx_hash }}
-</td>
-
-<td style="max-width:200px;word-break:break-word;">
-{{ log.scanned_tx_hash }}
-</td>
-
-<td>
-
-{% if log.status == "genuine" %}
-<span class="badge bg-success">Genuine</span>
-{% else %}
-<span class="badge bg-danger">Fake</span>
-{% endif %}
-
-</td>
-
-<td>
-{{ log.ist_date.strftime("%d %b %Y %I:%M %p") if log.ist_date }}
-</td>
-
-</tr>
-
-{% endfor %}
-
-</tbody>
-
-</table>
-
-</div>
-
-</div>
-
-<!-- ================= CHART SECTION ================= -->
-
-<div class="row mt-5">
-
-<div class="col-lg-4 mb-4">
-<div class="card border-0 shadow-sm h-100">
-<div class="card-body text-center">
-
-<h6 class="fw-semibold mb-3">
+<h5 style="
+font-size:18px;
+font-weight:600;
+margin-bottom:15px;
+">
 Verification Status
-</h6>
+</h5>
 
-<canvas id="verificationChart"></canvas>
+<canvas id="verificationChart" height="180"></canvas>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- CREDIBILITY CHART -->
+<div class="col-lg-6">
+
+<div class="card border-0 shadow-sm"
+style="border-radius:12px;">
+
+<div class="card-body">
+
+<h5 style="
+font-size:18px;
+font-weight:600;
+margin-bottom:15px;
+">
+Manufacturer Credibility
+</h5>
+
+<canvas id="credChart" height="180"></canvas>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
 
 </div>
 </div>
 </div>
 
 
-<div class="col-lg-4 mb-4">
-<div class="card border-0 shadow-sm h-100">
-<div class="card-body text-center">
-
-<h6 class="fw-semibold mb-3">
-Product Credibility
-</h6>
-
-<canvas id="productCredChart"></canvas>
-
-</div>
-</div>
-</div>
-
-
-<div class="col-lg-4 mb-4">
-<div class="card border-0 shadow-sm h-100">
-<div class="card-body text-center">
-
-<h6 class="fw-semibold mb-3">
-User Credibility
-</h6>
-
-<canvas id="userCredChart"></canvas>
-
-</div>
-</div>
-</div>
-
-</div>
-
-
-
-</div>
-</div>
-</div>
-
-
-<!-- ================= SEARCH SCRIPT ================= -->
-<script>
-function enableSearchAndFilter(searchId, filterId, tableId){
-
-const search = document.getElementById(searchId)
-const filter = document.getElementById(filterId)
-
-function run(){
-
-let searchValue = search.value.toLowerCase()
-let filterValue = filter.value.toLowerCase()
-
-document.querySelectorAll("#"+tableId+" tbody tr").forEach(row=>{
-
-let text = row.innerText.toLowerCase()
-
-let matchesSearch = text.includes(searchValue)
-
-let matchesFilter =
-filterValue === "" || text.includes(filterValue)
-
-row.style.display =
-(matchesSearch && matchesFilter) ? "" : "none"
-
-})
-
-}
-
-search.addEventListener("keyup", run)
-filter.addEventListener("change", run)
-
-}
-
-// enable all
-enableSearchAndFilter(
-"manufacturerSearch",
-"manufacturerFilter",
-"manufacturers"
-)
-
-enableSearchAndFilter(
-"customerSearch",
-"customerFilter",
-"customers"
-)
-
-enableSearchAndFilter(
-"productSearch",
-"productFilter",
-"products"
-)
-
-enableSearchAndFilter(
-"logSearch",
-"logFilter",
-"logs"
-)
-
-</script>
-
-<!-- ================= CHART SCRIPT ================= -->
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
 
-// ================= VERIFICATION CHART =================
-
+// PRODUCT CHART
 const genuineCount =
 {{ logs | selectattr("status","equalto","genuine") | list | length }};
 
 const fakeCount =
 {{ logs | selectattr("status","equalto","fake") | list | length }};
 
-new Chart(document.getElementById('verificationChart'), {
+const duplicateCount =
+{{ logs | selectattr("status","equalto","duplicate") | list | length }};
 
-type: 'doughnut',
-
-data: {
-
-labels: ['Genuine', 'Fake'],
-
-datasets: [{
-
-data: [genuineCount, fakeCount],
-
-backgroundColor: ['#198754','#dc3545']
-
-}]
-
-}
-
-});
+const alreadyVerifiedCount =
+{{ logs | selectattr("status","equalto","already_verified") | list | length }};
 
 
-// ================= PRODUCT CREDIBILITY =================
-
-const productCredibility = [
-
-{% for p in products %}
-{{ p.credibility_score if p.credibility_score is defined else 100 }},
-{% endfor %}
-
-];
-
-const avgProductCred =
-productCredibility.length > 0
-? Math.round(productCredibility.reduce((a,b)=>a+b,0) / productCredibility.length)
-: 100;
-
-new Chart(document.getElementById('productCredChart'), {
-
-type: 'doughnut',
-
-data: {
-
-labels: ['Credible', 'Risk'],
-
-datasets: [{
-
-data: [avgProductCred, 100 - avgProductCred],
-
-backgroundColor: ['#0d6efd','#ffc107']
-
-}]
-
-}
-
-});
-
-
-// ================= USER CREDIBILITY =================
-
-// ================= USER CREDIBILITY (CUSTOMERS + MANUFACTURERS) =================
-
-// Combine both lists
-const userCredibility = [
-
-{% for u in customers %}
-{{ u.credibility_score if u.credibility_score is defined else 100 }},
-{% endfor %}
-
-{% for u in manufacturers %}
-{{ u.credibility_score if u.credibility_score is defined else 100 }},
-{% endfor %}
-
-];
-
-// Calculate average credibility
-const avgUserCred =
-userCredibility.length > 0
-? Math.round(
-userCredibility.reduce((a,b)=>a+b,0)
-/
-userCredibility.length
-)
-: 100;
-
-
-// Chart
 new Chart(
-document.getElementById('userCredChart'),
+document.getElementById('verificationChart'),
 {
-type: 'doughnut',
+type:'doughnut',
 
-data: {
+data:{
+labels:[
+'Genuine',
+'Fake',
+'Duplicate',
+'Already Verified'
+],
 
-labels: ['Trusted Users', 'Risk Users'],
+datasets:[{
+data:[
+genuineCount,
+fakeCount,
+duplicateCount,
+alreadyVerifiedCount
+],
 
-datasets: [{
+backgroundColor:[
+'#16a34a',   // Genuine - green
+'#dc2626',   // Fake - red
+'#f59e0b',   // Duplicate - orange
+'#0b2a6e'    // Already verified - blue
+],
 
-data: [avgUserCred, 100 - avgUserCred],
-
-backgroundColor: ['#20c997','#dc3545']
-
+borderWidth:0
 }]
+},
 
+options:{
+plugins:{
+legend:{
+position:'bottom'
+}
+}
+}
+
+});
+
+// CREDIBILITY CHART
+const cred = [
+
+{% for m in manufacturers %}
+{{ m.credibility_score if m.credibility_score else 100 }},
+{% endfor %}
+
+];
+
+const avg =
+cred.length
+? Math.round(cred.reduce((a,b)=>a+b)/cred.length)
+: 100;
+
+new Chart(
+document.getElementById('credChart'),
+{
+type:'doughnut',
+
+data:{
+labels:['Trusted','Risk'],
+datasets:[{
+data:[avg,100-avg],
+backgroundColor:['#16a34a','#dc2626'],
+borderWidth:0
+}]
+},
+
+options:{
+plugins:{
+legend:{
+position:'bottom'
+}
+}
 }
 
 });
 
 </script>
-
-<script>
-
-// Save active tab when clicked
-document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(tab => {
-
-    tab.addEventListener('click', function(){
-
-        localStorage.setItem(
-            "activeAdminTab",
-            this.getAttribute("data-bs-target")
-        );
-
-    });
-
-});
-
-// Restore active tab after page reload
-document.addEventListener("DOMContentLoaded", function(){
-
-    let activeTab = localStorage.getItem("activeAdminTab");
-
-    if(activeTab){
-
-        let trigger =
-        document.querySelector(
-            'button[data-bs-target="' + activeTab + '"]'
-        );
-
-        if(trigger){
-
-            let tab = new bootstrap.Tab(trigger);
-
-            tab.show();
-
-        }
-
-    }
-
-});
-
-</script>
-
-<!-- ✅ AUTO SWITCH TAB -->
-
-{% if selected_manufacturer %}
-
-<script>
-
-document.addEventListener("DOMContentLoaded",function(){
-
-let trigger =
-document.querySelector(
-'button[data-bs-target="#products"]'
-);
-
-let tab = new bootstrap.Tab(trigger);
-
-tab.show();
-
-});
-
-</script>
-
-{% endif %}
-
 
 
 {% endblock %}

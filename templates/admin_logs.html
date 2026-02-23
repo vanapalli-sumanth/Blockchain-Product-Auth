@@ -1,0 +1,222 @@
+{% extends "admin_layout.html" %}
+
+{% block admin_content %}
+
+<div class="admin-dashboard-wrapper mb-4">
+
+<div class="card border-0 shadow-lg" style="border-radius:14px;background:white;">
+
+<div class="card-body p-4 p-md-5">
+
+<!-- HEADER -->
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+<div>
+
+<h1 style="color:#0b2a6e;font-size:26px;font-weight:600;">
+Verification Logs
+</h1>
+
+<p style="color:#64748b;">
+All product and unit verification activity
+</p>
+
+</div>
+
+<div>
+
+<a href="/admin/export-logs-excel"
+class="btn btn-sm"
+style="background:#eeeeb5;border-radius:8px;">
+
+Export Excel
+
+</a>
+
+</div>
+
+</div>
+<div class="row mb-3">
+
+<div class="col-md-4 mb-2">
+<input type="text"
+id="searchLogs"
+class="form-control"
+placeholder="Search product, unit, user">
+</div>
+
+<div class="col-md-3 mb-2">
+<select id="statusFilterLogs" class="form-control">
+<option value="">All Status</option>
+<option value="genuine">Genuine</option>
+<option value="duplicate">Duplicate</option>
+<option value="already verified">Already Verified</option>
+<option value="fake">Fake</option>
+</select>
+</div>
+
+</div>
+
+<!-- TABLE -->
+
+<div class="card border-0 shadow-sm" style="border-radius:12px;">
+
+<div class="table-responsive">
+
+<table class="table align-middle text-center mb-0">
+
+<thead style="background:#f1f5f9;">
+
+<tr>
+
+<th>Product</th>
+<th>Unit</th>
+<th>Scratch</th>
+<th>Manufacturer</th>
+<th>Brand</th>
+<th>Verified By</th>
+<th>Owner</th>
+<th>Status</th>
+<th>Location</th>
+<th>IP</th>
+<th>Date</th>
+
+</tr>
+
+</thead>
+
+<tbody id="logsTable">
+
+{% for log in logs %}
+
+<tr data-status="{{ log.status }}">
+
+<td>
+
+<b>{{ log.product_id }}</b>
+<br>
+<small>{{ log.product_name }}</small>
+
+</td>
+
+<td>{{ log.unit_id }}</td>
+
+<td>
+<span class="badge bg-dark">
+{{ log.scratch_code }}
+</span>
+</td>
+
+<td>{{ log.manufacturer }}</td>
+
+<td>{{ log.brand }}</td>
+
+<td>{{ log.verified_by }}</td>
+
+<td>{{ log.owner or "-" }}</td>
+
+<td>
+
+{% if log.status == "genuine" %}
+<span class="badge bg-success">Genuine</span>
+
+{% elif log.status == "duplicate" %}
+<span class="badge bg-warning text-dark">Duplicate</span>
+
+{% elif log.status == "already_verified" %}
+<span class="badge bg-info">Already Verified</span>
+
+{% else %}
+<span class="badge bg-danger">Fake</span>
+{% endif %}
+
+</td>
+
+<td>{{ log.location }}</td>
+
+<td>{{ log.ip_address }}</td>
+
+<td>
+
+{% if log.ist_date %}
+{{ log.ist_date.strftime("%d %b %Y") }}
+<br>
+<small>{{ log.ist_date.strftime("%I:%M %p") }}</small>
+{% endif %}
+
+</td>
+
+</tr>
+
+{% else %}
+
+<tr>
+<td colspan="11" class="text-muted py-4">
+No logs found
+</td>
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<script>
+
+document.addEventListener("DOMContentLoaded", function(){
+
+const searchLogs = document.getElementById("searchLogs");
+const statusLogs = document.getElementById("statusFilterLogs");
+
+function filterLogs(){
+
+let search = searchLogs.value.toLowerCase().trim();
+let status = statusLogs.value.toLowerCase();
+
+let rows = document.querySelectorAll("#logsTable tr");
+
+rows.forEach(row=>{
+
+let product = row.cells[0].innerText.toLowerCase();
+let unit = row.cells[1].innerText.toLowerCase();
+let manufacturer = row.cells[3].innerText.toLowerCase();
+let verifiedBy = row.cells[5].innerText.toLowerCase();
+
+let rowStatus = row.dataset.status.toLowerCase();
+
+let matchSearch =
+product.includes(search) ||
+unit.includes(search) ||
+manufacturer.includes(search) ||
+verifiedBy.includes(search);
+
+let matchStatus =
+!status || rowStatus === status;
+
+row.style.display =
+(matchSearch && matchStatus)
+? ""
+: "none";
+
+});
+
+}
+
+searchLogs.addEventListener("keyup", filterLogs);
+statusLogs.addEventListener("change", filterLogs);
+
+});
+
+</script>
+{% endblock %}

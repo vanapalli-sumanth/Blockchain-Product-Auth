@@ -5,21 +5,16 @@
 
 <div class="container mt-5 mb-5 pb-5">
 
-
 <div class="row justify-content-center">
 
 <div class="col-md-6 col-lg-5">
 
-
 <!-- CARD -->
-
 <div class="card border-0 shadow-sm">
 
 <div class="card-body p-4">
 
-
 <!-- HEADER -->
-
 <div class="text-center mb-4">
 
 <div class="verify-icon mb-2">
@@ -37,11 +32,10 @@ Register product securely on blockchain
 </div>
 
 
-
 <!-- FORM -->
-
 <form method="POST">
 
+<!-- Product Name -->
 <div class="mb-3">
 
 <label class="form-label fw-semibold">
@@ -57,7 +51,55 @@ required>
 </div>
 
 
+<!-- Manufacturer Full Name (AUTO) -->
+<div class="mb-3">
 
+<label class="form-label fw-semibold">
+Manufacturer Name
+</label>
+
+<input type="text"
+class="form-control"
+value="{{ session.get('full_name') }}"
+readonly>
+
+<div class="form-text">
+Automatically fetched from your profile
+</div>
+
+</div>
+
+
+<!-- Manufacturer Brand -->
+<div class="mb-3">
+
+<label class="form-label fw-semibold">
+Manufacturer Brand
+</label>
+
+<input type="text"
+name="brand"
+class="form-control"
+placeholder="Enter brand name (example: Nike, Samsung, Apple)"
+required>
+
+</div>
+
+<div class="mb-3">
+
+<label class="form-label fw-semibold">
+Quantity
+</label>
+
+<input type="number"
+name="quantity"
+class="form-control"
+placeholder="Enter number of units"
+required min="1">
+
+</div>
+
+<!-- Product ID -->
 <div class="mb-3">
 
 <label class="form-label fw-semibold">
@@ -76,9 +118,7 @@ Secure blockchain ID will be generated automatically
 </div>
 
 
-
 <!-- BUTTONS -->
-
 <div class="d-flex gap-2 mt-4">
 
 <button id="submitBtn"
@@ -99,7 +139,6 @@ class="spinner-border spinner-border-sm ms-2 d-none">
 </button>
 
 
-
 <a href="/manufacturer/dashboard"
 class="btn btn-outline-dark w-100">
 
@@ -112,16 +151,13 @@ Cancel
 
 </form>
 
-
 </div>
 </div>
-
 
 </div>
 </div>
 
 </div>
-
 
 
 <script>
@@ -143,6 +179,5 @@ document.querySelector("form").addEventListener("submit", function() {
 })
 
 </script>
-
 
 {% endblock %}

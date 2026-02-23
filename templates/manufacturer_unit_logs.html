@@ -1,0 +1,473 @@
+{% extends "base.html" %}
+{% block title %}Unit Verification Logs | BlockAuth{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5 mb-5">
+
+<div class="card border-0 shadow-lg">
+
+<div class="card-body p-4 p-md-5">
+
+<!-- HEADER -->
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+
+<div>
+
+<h2 style="color:#0b2a6e;font-weight:600;">
+Unit Verification Logs
+</h2>
+
+<p class="text-muted mb-0">
+
+Product: <strong>{{ product.name }}</strong>
+
+<br>
+
+Unit ID: <strong>{{ unit.unit_id }}</strong>
+
+</p>
+
+</div>
+
+
+<div>
+
+<a href="/manufacturer/export-unit-logs-excel/{{ unit.unit_id }}"
+class="btn me-2"
+style="background:#eeeeb5; color:#333; border-radius:8px; border:1px solid #e6e2c3; font-size:16px; font-weight:500; padding:8px 16px;">
+Export Excel
+</a>
+
+<a href="/manufacturer/product-units/{{ unit.product_id }}"
+class="btn btn-dark">
+
+Back to Units
+
+</a>
+
+</div>
+
+</div>
+{% if viewing_as_admin %}
+<div class="alert alert-warning mb-3">
+<i class="fa-solid fa-user-shield me-2"></i>
+Viewing as Admin
+</div>
+{% endif %}
+<!-- FULL UNIT DETAILS CARD -->
+
+<div class="card border-0 shadow-sm mb-4">
+
+<div class="card-body">
+
+<div class="row">
+
+<div class="col-md-4 mb-3">
+
+<div class="text-muted small">Product Name</div>
+
+<div style="font-weight:600;">
+{{ product.name }}
+</div>
+
+</div>
+
+<div class="col-md-4 mb-3">
+
+<div class="text-muted small">Product ID</div>
+
+<div style="font-weight:600;">
+{{ product.product_id }}
+</div>
+
+</div>
+
+<div class="col-md-4 mb-3">
+
+<div class="text-muted small">Brand</div>
+
+<div style="font-weight:600;">
+{{ product.manufacturer_brand }}
+</div>
+
+</div>
+
+<div class="col-md-4 mb-3">
+
+<div class="text-muted small">Manufacturer</div>
+
+<div style="font-weight:600;">
+{{ product.manufacturer_name }}
+</div>
+
+</div>
+
+<div class="col-md-4 mb-3">
+
+<div class="text-muted small">Unit ID</div>
+
+<div style="font-weight:600;">
+{{ unit.unit_id }}
+</div>
+
+</div>
+
+<div class="col-md-4 mb-3">
+
+<div class="text-muted small">Status</div>
+
+<div style="font-weight:600;">
+
+{% if unit.owner_username %} <span class="text-danger">Used</span>
+{% else %} <span class="text-success">Unused</span>
+{% endif %}
+
+</div>
+
+</div>
+
+<div class="col-md-4 mb-3">
+
+<div class="text-muted small">Owner</div>
+
+<div style="font-weight:600;">
+
+{{ unit.owner_username or "Not claimed" }}
+
+</div>
+
+</div>
+
+<div class="col-md-4 mb-3">
+
+<div class="text-muted small">Owned Date</div>
+
+<div style="font-weight:600;">
+
+{% if unit.owned_at_ist %}
+
+{{ unit.owned_at_ist.strftime("%d %b %Y") }}
+
+<br>
+
+<small>
+{{ unit.owned_at_ist.strftime("%I:%M %p") }}
+</small>
+
+{% else %}
+
+Not owned yet
+
+{% endif %}
+
+</div>
+
+</div>
+
+<div class="col-md-4 mb-3">
+
+<div class="text-muted small">Created Date</div>
+
+<div style="font-weight:600;">
+
+{% if unit.created_at_ist %}
+
+{{ unit.created_at_ist.strftime("%d %b %Y") }}
+
+<br>
+
+<small>
+{{ unit.created_at_ist.strftime("%I:%M %p") }}
+</small>
+
+{% else %}
+
+Not available
+
+{% endif %}
+
+</div>
+
+</div>
+
+<div class="col-md-12">
+
+<div class="text-muted small">Blockchain Transaction Hash</div>
+
+<div style="font-weight:600;word-break:break-word;">
+{{ product.tx_hash }}
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="row p-3">
+
+<div class="col-md-4 mb-2">
+<input type="text"
+id="searchInput"
+class="form-control form-control-sm"
+placeholder="Search username, owner, IP, location">
+</div>
+
+<div class="col-md-3 mb-2">
+<select id="statusFilter"
+class="form-control form-control-sm">
+
+<option value="">All Status</option>
+<option value="genuine">Genuine</option>
+<option value="fake">Fake</option>
+<option value="duplicate">Duplicate</option>
+<option value="already_verified">Already Verified</option>
+
+</select>
+</div>
+
+<div class="col-md-3 mb-2">
+<select id="ownershipFilter"
+class="form-control form-control-sm">
+
+<option value="">All Ownership</option>
+<option value="claimed">Claimed</option>
+<option value="unclaimed">Unclaimed</option>
+
+</select>
+</div>
+
+<div class="col-md-2 mb-2">
+<select id="dateFilter"
+class="form-control form-control-sm">
+
+<option value="">All Dates</option>
+<option value="today">Today</option>
+<option value="week">Last 7 days</option>
+<option value="month">Last 30 days</option>
+
+</select>
+</div>
+
+</div>
+<!-- LOG TABLE -->
+
+<div class="card border-0 shadow-sm">
+
+<div class="card-body p-0">
+
+<div class="table-responsive">
+
+<table class="table table-hover align-middle mb-0">
+
+<thead style="background:#0b2a6e;color:white;">
+
+<tr>
+
+<th class="ps-4">Username</th>
+
+<th>Status</th>
+
+<th>Owner</th>
+
+<th>Date & Time</th>
+
+<th>Location</th>
+
+<th class="pe-4">IP Address</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for log in logs %}
+
+<tr
+data-status="{{ log.status }}"
+data-owner="{{ 'claimed' if log.owner_username else 'unclaimed' }}"
+data-date="{{ log.ist_date.strftime('%Y-%m-%d') if log.ist_date else '' }}"
+>
+
+<td class="ps-4">
+
+{{ log.username }}
+
+</td>
+
+<td>
+
+{% if log.status == "genuine" %}
+
+<span class="badge bg-success">Genuine</span>
+
+{% elif log.status == "fake" %}
+
+<span class="badge bg-danger">Fake</span>
+
+{% elif log.status == "duplicate" %}
+
+<span class="badge bg-danger">Duplicate</span>
+
+{% elif log.status == "already_verified" %}
+
+<span class="badge bg-primary">Already Verified</span>
+
+{% else %}
+
+<span class="badge bg-secondary">
+{{ log.status }}
+</span>
+
+{% endif %}
+
+</td>
+
+<td>
+
+{{ log.owner_username or "Not claimed" }}
+
+</td>
+
+<td>
+
+{% if log.ist_date %}
+
+{{ log.ist_date.strftime("%d %b %Y") }}
+
+<br>
+
+<small>
+
+{{ log.ist_date.strftime("%I:%M %p") }}
+
+</small>
+
+{% endif %}
+
+</td>
+
+<td>
+
+{{ log.location or "Unknown" }}
+
+</td>
+
+<td class="pe-4">
+
+{{ log.ip_address or "Unknown" }}
+
+</td>
+
+</tr>
+
+{% else %}
+
+<tr>
+
+<td colspan="6"
+class="text-center py-4 text-muted">
+
+No logs found for this unit
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+</div>
+</div>
+<script>
+
+document.addEventListener("DOMContentLoaded", function(){
+
+const searchInput = document.getElementById("searchInput");
+const statusFilter = document.getElementById("statusFilter");
+const ownershipFilter = document.getElementById("ownershipFilter");
+const dateFilter = document.getElementById("dateFilter");
+
+function filterLogs(){
+
+let search = searchInput.value.toLowerCase();
+let status = statusFilter.value;
+let ownership = ownershipFilter.value;
+let date = dateFilter.value;
+
+let rows = document.querySelectorAll("tbody tr");
+
+rows.forEach(row=>{
+
+let text = row.innerText.toLowerCase();
+
+let rowStatus = row.dataset.status;
+let rowOwner = row.dataset.owner;
+let rowDate = row.dataset.date;
+
+let matchSearch = text.includes(search);
+
+let matchStatus =
+!status || rowStatus === status;
+
+let matchOwnership =
+!ownership || rowOwner === ownership;
+
+let matchDate = true;
+
+if(date){
+
+let today = new Date();
+let logDate = new Date(rowDate);
+
+let diffDays =
+(today - logDate) /
+(1000*60*60*24);
+
+if(date === "today")
+matchDate = diffDays < 1;
+
+else if(date === "week")
+matchDate = diffDays <= 7;
+
+else if(date === "month")
+matchDate = diffDays <= 30;
+
+}
+
+row.style.display =
+(matchSearch &&
+matchStatus &&
+matchOwnership &&
+matchDate)
+? ""
+: "none";
+
+});
+
+}
+
+searchInput.addEventListener("keyup", filterLogs);
+statusFilter.addEventListener("change", filterLogs);
+ownershipFilter.addEventListener("change", filterLogs);
+dateFilter.addEventListener("change", filterLogs);
+
+});
+
+</script>
+{% endblock %}

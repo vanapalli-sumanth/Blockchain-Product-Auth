@@ -1,107 +1,122 @@
 {% extends "base.html" %}
-
 {% block title %}Customer Dashboard{% endblock %}
 
 {% block content %}
 
-<div class="container mt-5 mb-5">
+<div class="container mb-5" style="margin-top:90px; max-width:1350px;">
 
-
-<!-- ================= BIG BACKGROUND CARD ================= -->
-
-<div class="card border-0 shadow-lg">
+<div class="card border-0 shadow-lg" style="border-radius:14px;">
 
 <div class="card-body p-4 p-md-5">
 
+<!-- HEADER -->
 
-<!-- ================= HEADER ================= -->
+<!-- HEADER -->
 
-<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
 
 <div>
 
-<h2 class="fw-bold mb-1" style="color:#0b2a6e;">
+<h1 style="color:#0b2a6e; font-size:30px; font-weight:600;">
 Customer Dashboard
-</h2>
+</h1>
 
-<p class="text-muted mb-0">
-View and manage your product verification history
+<p style="font-size:20px; font-weight:500; margin:0;">
+
+<span style="color:#64748b;">
+Customer:
+</span>
+
+<span style="font-weight:600;">
+{{ customer_name }}
+</span>
+
 </p>
 
 </div>
 
 
-<div class="mt-3 mt-md-0">
+<!-- Hide Scan button in Admin view -->
+{% if not admin_view %}
 
-<a href="/customer/export-logs-excel"
-class="btn btn-success me-2">
-
-<i class="fa-solid fa-file-excel me-1"></i>
-Export Excel
-
-</a>
-
-
-<a href="/customer/export-logs-pdf"
-class="btn btn-danger me-2">
-
-<i class="fa-solid fa-file-pdf me-1"></i>
-Export PDF
-
-</a>
-
+<div>
 
 <a href="/verify"
-class="btn btn-dark">
-
-<i class="fa-solid fa-qrcode me-1"></i>
+class="btn btn-dark"
+style="border-radius:8px; padding:8px 16px; font-size:16px;">
 Scan Product
-
 </a>
 
 </div>
 
+{% endif %}
+
 </div>
 
 
+{% if admin_view %}
+<div class="alert alert-warning mb-3">
+<i class="fa-solid fa-user-shield me-2"></i>
+Viewing as Admin
+</div>
+{% endif %}
 
-<!-- ================= SEARCH + FILTER ================= -->
+<!-- ================= OWNED PRODUCTS ================= -->
 
-<div class="card border-0 shadow-sm mb-4">
+<div class="card border-0 shadow-sm mb-4" style="border-radius:12px;">
 
-<div class="card-body">
+<div class="p-3 border-bottom">
 
-<div class="row g-3">
+<h5 style="font-size:22px; font-weight:600;">
+Owned Products
+</h5>
 
-<div class="col-md-6">
+</div><div class="p-3 border-bottom">
 
-<label class="form-label fw-semibold">
-Search Verification History
-</label>
+<div class="d-flex flex-column flex-md-row justify-content-between gap-2">
 
+<h5 style="font-size:22px;font-weight:600;margin:0;">
+Owned Products
+</h5>
+
+<div class="row g-2" style="min-width:500px;">
+
+<div class="col-md-5">
 <input type="text"
-id="searchInput"
-class="form-control"
-placeholder="Search product or manufacturer">
-
+id="ownedSearch"
+class="form-control form-control-sm"
+placeholder="Search Product, Unit, Brand">
 </div>
 
+<div class="col-md-4">
+<select id="ownedBrandFilter"
+class="form-control form-control-sm">
 
-<div class="col-md-3">
+<option value="">All Brands</option>
 
-<label class="form-label fw-semibold">
-Filter by Status
-</label>
-
-<select id="statusFilter"
-class="form-control">
-
-<option value="">All Status</option>
-<option value="Genuine">Genuine</option>
-<option value="Fake">Fake</option>
+{% set brands=[] %}
+{% for p in owned_products %}
+{% if p.brand not in brands %}
+{% set _=brands.append(p.brand) %}
+<option value="{{ p.brand }}">
+{{ p.brand }}
+</option>
+{% endif %}
+{% endfor %}
 
 </select>
+</div>
 
+<div class="col-md-3">
+<select id="ownedDateFilter"
+class="form-control form-control-sm">
+
+<option value="">All Dates</option>
+<option value="today">Today</option>
+<option value="week">Last 7 days</option>
+<option value="month">Last 30 days</option>
+
+</select>
 </div>
 
 </div>
@@ -109,30 +124,24 @@ class="form-control">
 </div>
 
 </div>
-
-
-
-<!-- ================= TABLE ================= -->
-
-<div class="card border-0 shadow-sm">
-
-<div class="card-body p-0">
 
 <div class="table-responsive">
 
-<table class="table table-hover align-middle mb-0" id="logTable">
+<table class="table text-center align-middle mb-0">
 
-<thead style="background:#0b2a6e;color:white;">
+<thead style="background:#f1f5f9; font-size:17px;">
 
 <tr>
 
-<th class="ps-3">Product ID</th>
-
+<th>QR</th>
+<th>Product ID</th>
+<th>Unit ID</th>
+<th>Name</th>
+<th>Scratch Code</th>
+<th>Brand</th>
 <th>Manufacturer</th>
-
-<th>Status</th>
-
-<th class="pe-3">Date (IST)</th>
+<th>Manufactured</th>
+<th>Owned</th>
 
 </tr>
 
@@ -140,43 +149,95 @@ class="form-control">
 
 <tbody>
 
-{% for log in logs %}
+{% for p in owned_products %}
 
-<tr>
-
-<td class="ps-3 fw-semibold">
-{{ log.scanned_product_id }}
-</td>
-
-
-<td>
-{{ log.manufacturer }}
-</td>
+<tr
+data-brand="{{ p.brand }}"
+data-date="{{ p.owned_at_ist.strftime('%Y-%m-%d') if p.owned_at_ist else '' }}"
+style="font-size:16px;font-weight:500;">
 
 
 <td>
 
-{% if log.status == "genuine" %}
+{% if p.qr_code %}
 
-<span class="badge bg-success px-3 py-2">
-<i class="fa-solid fa-check me-1"></i>
-Genuine
-</span>
+<a href="{{ url_for('static', filename=p.qr_code) }}" target="_blank">
+
+<img src="{{ url_for('static', filename=p.qr_code) }}"
+style="width:70px;height:70px;border-radius:8px;border:1px solid #ddd;">
+
+</a>
 
 {% else %}
 
-<span class="badge bg-danger px-3 py-2">
-<i class="fa-solid fa-xmark me-1"></i>
-Fake
-</span>
+No QR
 
 {% endif %}
 
 </td>
 
 
-<td class="pe-3" style="font-size:14px;">
-{{ log.ist_date.strftime("%d %b %Y %I:%M %p") }}
+<td>{{ p.product_id }}</td>
+
+<td>{{ p.unit_id }}</td>
+
+<td>{{ p.product_name }}</td>
+
+
+<td>
+
+<span style="
+background:black;
+color:white;
+padding:5px 12px;
+border-radius:6px;
+font-size:14px;
+letter-spacing:1px;
+">
+
+{{ p.scratch_code }}
+
+</span>
+
+</td>
+
+
+<td>{{ p.brand }}</td>
+
+<td>{{ p.manufacturer }}</td>
+
+
+<td>
+
+{% if p.manufactured_at_ist %}
+
+{{ p.manufactured_at_ist.strftime("%d %b %Y") }}
+
+<br>
+
+<small>
+{{ p.manufactured_at_ist.strftime("%I:%M %p") }}
+</small>
+
+{% endif %}
+
+</td>
+
+
+<td>
+
+{% if p.owned_at_ist %}
+
+{{ p.owned_at_ist.strftime("%d %b %Y") }}
+
+<br>
+
+<small>
+{{ p.owned_at_ist.strftime("%I:%M %p") }}
+</small>
+
+{% endif %}
+
 </td>
 
 </tr>
@@ -186,11 +247,10 @@ Fake
 
 <tr>
 
-<td colspan="4"
-class="text-center py-4 text-muted">
+<td colspan="9"
+style="padding:40px;color:#64748b;font-size:18px;">
 
-<i class="fa-solid fa-circle-info me-1"></i>
-No verification history yet
+No owned products yet
 
 </td>
 
@@ -206,60 +266,361 @@ No verification history yet
 
 </div>
 
+
+
+<!-- ================= VERIFICATION LOGS ================= -->
+
+<div class="card border-0 shadow-sm" style="border-radius:12px;">
+
+<div class="p-3 border-bottom">
+
+<div class="d-flex flex-column flex-md-row justify-content-between gap-2">
+
+<h5 style="font-size:22px;font-weight:600;margin:0;">
+Verification Logs
+</h5>
+
+<div class="row g-2" style="min-width:500px;">
+
+<div class="col-md-5">
+<input type="text"
+id="logSearch"
+class="form-control form-control-sm"
+placeholder="Search Product, Unit, Location">
+</div>
+
+<div class="col-md-4">
+<select id="logStatusFilter"
+class="form-control form-control-sm">
+
+<option value="">All Status</option>
+<option value="genuine">Genuine</option>
+<option value="duplicate">Duplicate</option>
+<option value="already_verified">Already Verified</option>
+<option value="fake">Fake</option>
+
+</select>
+</div>
+
+<div class="col-md-3">
+<select id="logDateFilter"
+class="form-control form-control-sm">
+
+<option value="">All Dates</option>
+<option value="today">Today</option>
+<option value="week">Last 7 days</option>
+<option value="month">Last 30 days</option>
+
+</select>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="table-responsive">
+
+<table class="table text-center align-middle mb-0">
+
+<thead style="background:#f1f5f9;font-size:17px;">
+
+<tr>
+
+<th>Product ID</th>
+<th>Unit ID</th>
+<th>Status</th>
+<th>Location</th>
+<th>IP Address</th>
+<th>Owner</th>
+<th>Manufacturer</th>
+<th>Date</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for log in logs %}
+
+<tr
+data-status="{{ log.status }}"
+data-date="{{ log.ist_date.strftime('%Y-%m-%d') if log.ist_date else '' }}"
+style="font-size:16px;font-weight:500;">
+
+
+<td>{{ log.product_id }}</td>
+
+<td>{{ log.unit_id }}</td>
+
+
+<td>
+
+{% if log.status == "genuine" %}
+
+<span class="badge bg-success">Genuine</span>
+
+{% elif log.status == "duplicate" %}
+
+<span class="badge bg-warning">Duplicate</span>
+
+{% elif log.status == "already_verified" %}
+
+<span class="badge bg-info">Already Verified</span>
+
+{% elif log.status == "scanned" %}
+
+<span class="badge bg-secondary">Scanned</span>
+
+{% else %}
+
+<span class="badge bg-danger">Fake</span>
+
+{% endif %}
+
+</td>
+
+
+<td>{{ log.location }}</td>
+
+<td>{{ log.ip_address }}</td>
+
+<td>{{ log.owner or "-" }}</td>
+
+<td>{{ log.manufacturer }}</td>
+
+
+<td>
+
+{% if log.ist_date %}
+
+{{ log.ist_date.strftime("%d %b %Y") }}
+
+<br>
+
+<small>
+
+{{ log.ist_date.strftime("%I:%M %p") }}
+
+</small>
+
+{% endif %}
+
+</td>
+
+</tr>
+
+
+{% else %}
+
+<tr>
+
+<td colspan="8"
+style="padding:40px;color:#64748b;font-size:18px;">
+
+No verification logs yet
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
 </div>
 
 
 </div>
 </div>
-
 </div>
-
-
-
-<!-- ================= SEARCH SCRIPT ================= -->
-
 <script>
 
-const searchInput =
-document.getElementById("searchInput")
+document.addEventListener("DOMContentLoaded", function(){
 
-const statusFilter =
-document.getElementById("statusFilter")
+// OWNED PRODUCTS FILTER
 
-searchInput.addEventListener("keyup", filterTable)
-statusFilter.addEventListener("change", filterTable)
+const ownedSearch =
+document.getElementById("ownedSearch");
 
-function filterTable(){
+const ownedBrandFilter =
+document.getElementById("ownedBrandFilter");
+
+const ownedDateFilter =
+document.getElementById("ownedDateFilter");
+
+function filterOwned(){
 
 let search =
-searchInput.value.toLowerCase()
+ownedSearch.value.toLowerCase();
 
-let status =
-statusFilter.value.toLowerCase()
+let brand =
+ownedBrandFilter.value;
 
-let rows =
-document.querySelectorAll("#logTable tbody tr")
+let date =
+ownedDateFilter.value;
 
-rows.forEach(row=>{
+document.querySelectorAll(
+"table tbody tr"
+).forEach(row=>{
+
+if(!row.dataset.brand) return;
 
 let text =
-row.innerText.toLowerCase()
+row.innerText.toLowerCase();
 
-let matchesSearch =
-text.includes(search)
+let rowBrand =
+row.dataset.brand;
 
-let matchesStatus =
-status=="" || text.includes(status)
+let rowDate =
+row.dataset.date;
 
-row.style.display =
-(matchesSearch && matchesStatus)
-? ""
-: "none"
+let matchSearch =
+text.includes(search);
 
-})
+let matchBrand =
+!brand || rowBrand === brand;
+
+let matchDate = true;
+
+if(date){
+
+let today = new Date();
+
+let ownedDate =
+new Date(rowDate);
+
+let diffDays =
+(today-ownedDate)/(1000*60*60*24);
+
+if(date==="today")
+matchDate = diffDays<1;
+
+else if(date==="week")
+matchDate = diffDays<=7;
+
+else if(date==="month")
+matchDate = diffDays<=30;
 
 }
 
-</script>
+row.style.display =
+(matchSearch &&
+matchBrand &&
+matchDate)
+? ""
+: "none";
 
+});
+
+}
+
+
+// LOG FILTER
+
+const logSearch =
+document.getElementById("logSearch");
+
+const logStatusFilter =
+document.getElementById("logStatusFilter");
+
+const logDateFilter =
+document.getElementById("logDateFilter");
+
+function filterLogs(){
+
+let search =
+logSearch.value.toLowerCase();
+
+let status =
+logStatusFilter.value;
+
+let date =
+logDateFilter.value;
+
+document.querySelectorAll(
+"table tbody tr"
+).forEach(row=>{
+
+if(!row.dataset.status) return;
+
+let text =
+row.innerText.toLowerCase();
+
+let rowStatus =
+row.dataset.status;
+
+let rowDate =
+row.dataset.date;
+
+let matchSearch =
+text.includes(search);
+
+let matchStatus =
+!status || rowStatus===status;
+
+let matchDate = true;
+
+if(date){
+
+let today=new Date();
+
+let logDate=new Date(rowDate);
+
+let diffDays=
+(today-logDate)/(1000*60*60*24);
+
+if(date==="today")
+matchDate=diffDays<1;
+
+else if(date==="week")
+matchDate=diffDays<=7;
+
+else if(date==="month")
+matchDate=diffDays<=30;
+
+}
+
+row.style.display=
+(matchSearch &&
+matchStatus &&
+matchDate)
+? ""
+: "none";
+
+});
+
+}
+
+
+// EVENTS
+
+ownedSearch.addEventListener(
+"keyup", filterOwned);
+
+ownedBrandFilter.addEventListener(
+"change", filterOwned);
+
+ownedDateFilter.addEventListener(
+"change", filterOwned);
+
+
+logSearch.addEventListener(
+"keyup", filterLogs);
+
+logStatusFilter.addEventListener(
+"change", filterLogs);
+
+logDateFilter.addEventListener(
+"change", filterLogs);
+
+});
+
+</script>
 {% endblock %}

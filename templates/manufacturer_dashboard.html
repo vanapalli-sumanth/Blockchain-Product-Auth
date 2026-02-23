@@ -3,230 +3,251 @@
 
 {% block content %}
 
-<div class="container mt-5 mb-5">
+<div class="container mb-5" style="margin-top:90px; max-width:1350px;">
 
-
-<!-- ================= BIG BACKGROUND CARD ================= -->
-
-<div class="card border-0 shadow-lg">
+<div class="card border-0 shadow-lg" style="border-radius:14px;">
 
 <div class="card-body p-4 p-md-5">
 
+<!-- HEADER -->
 
-
-<!-- ================= HEADER ================= -->
-
-<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
 
 <div>
 
-<h2 class="fw-bold mb-1" style="color:#0b2a6e;">
+<h1 style="color:#0b2a6e; font-size:30px; font-weight:600; margin-bottom:6px;">
 Manufacturer Dashboard
-</h2>
+</h1>
 
-<p class="text-muted mb-0 fs-6">
-Manage, monitor, and verify your blockchain-registered products
+<p style="font-size:20px; font-weight:500; color:#000; margin:0;">
+
+<span style="color:#64748b;">
+Manufacturer:
+</span>
+
+<span style="color:#000; font-weight:600;">
+{{ manufacturer_name }}
+</span>
+
 </p>
 
 </div>
 
-
-<div class="mt-3 mt-md-0">
+<div>
 
 <a href="/manufacturer/export-products-excel"
-class="btn btn-success me-2">
+class="btn me-2"
+style="background:#eeeeb5; color:#333; border-radius:8px; border:1px solid #e6e2c3; font-size:16px; font-weight:500; padding:8px 16px;">
 
-<i class="fa-solid fa-file-excel me-1"></i>
 Export Excel
 
 </a>
-
-
-<a href="/manufacturer/export-products-pdf"
-class="btn btn-danger me-2">
-
-<i class="fa-solid fa-file-pdf me-1"></i>
-Export PDF
-
-</a>
-
-
+{% if not viewing_as_admin %}
 <a href="/manufacturer/add-product"
-class="btn btn-dark">
+class="btn btn-dark"
+style="border-radius:8px; font-size:16px; font-weight:500; padding:8px 16px;">
 
-<i class="fa-solid fa-plus me-1"></i>
 Add Product
 
 </a>
 
+{% endif %}
+
+</div>
+
+</div>
+
+{% if viewing_as_admin %}
+<div class="alert alert-warning mb-3">
+<i class="fa-solid fa-user-shield me-2"></i>
+Viewing as Admin
+</div>
+{% endif %}
+
+<!-- STATS -->
+
+<div class="row mb-4">
+
+<div class="col-md-3 col-6">
+
+<div class="card border-0 shadow-sm"
+style="border-radius:10px; background:#f8fafc;">
+
+<div class="card-body py-3 px-3 text-center">
+
+<div style="font-size:16px; color:#64748b; font-weight:500;">
+Total Products
+</div>
+
+<div style="font-size:26px; color:#000; font-weight:600;">
+{{ products|length }}
 </div>
 
 </div>
 
+</div>
 
+</div>
 
-<!-- ================= SEARCH + FILTER CARD ================= -->
+<div class="col-md-3 col-6">
 
-<div class="card border-0 shadow-sm mb-4">
+<div class="card border-0 shadow-sm"
+style="border-radius:10px; background:#f8fafc;">
 
-<div class="card-body">
+<div class="card-body py-3 px-3 text-center">
 
-<div class="row g-3">
+<div style="font-size:16px; color:#64748b; font-weight:500;">
+Credibility Score
+</div>
 
-<div class="col-md-6">
+<div style="font-size:26px; color:#000; font-weight:600;">
+{{ manufacturer_credibility }}%
+</div>
 
-<label class="form-label fw-semibold">
-<i class="fa-solid fa-magnifying-glass me-1"></i>
-Search Products
-</label>
+</div>
 
+</div>
+
+</div>
+
+</div>
+<div class="row">
+
+<div class="col-md-4 mb-2">
 <input type="text"
 id="searchInput"
-class="form-control form-control-lg"
-placeholder="Search by Product ID, Name, or Tx Hash">
-
+class="form-control form-control-sm"
+placeholder="Search product, brand, hash">
 </div>
 
+<div class="col-md-3 mb-2">
+<select id="brandFilter" class="form-control form-control-sm">
+<option value="">All Brands</option>
 
-<div class="col-md-3">
-
-<label class="form-label fw-semibold">
-<i class="fa-solid fa-filter me-1"></i>
-Filter by Status
-</label>
-
-<select id="statusFilter"
-class="form-control form-control-lg">
-
-<option value="">All Status</option>
-<option value="Registered">Registered</option>
+{% set brands = [] %}
+{% for p in products %}
+{% if p.manufacturer_brand not in brands %}
+{% set _ = brands.append(p.manufacturer_brand) %}
+<option value="{{ p.manufacturer_brand }}">
+{{ p.manufacturer_brand }}
+</option>
+{% endif %}
+{% endfor %}
 
 </select>
+</div>
 
+<div class="col-md-3 mb-2">
+<select id="dateFilter" class="form-control form-control-sm">
+<option value="">All Dates</option>
+<option value="today">Today</option>
+<option value="week">Last 7 days</option>
+<option value="month">Last 30 days</option>
+</select>
 </div>
 
 </div>
+<!-- TABLE CARD -->
+
+<!-- TABLE CARD -->
+
+<div class="card border-0 shadow-sm" style="border-radius:12px;">
+
+<!-- HEADER -->
+<div class="d-flex justify-content-between align-items-center p-3"
+style="border-bottom:1px solid #e9ecef;">
+
+<h5 style="color:#000; font-size:22px; font-weight:600;">
+Products
+</h5>
 
 </div>
 
-</div>
-
-
-
-<!-- ================= TABLE CARD ================= -->
-
-<div class="card border-0 shadow-sm">
-
-<div class="card-body p-0">
-
+<!-- TABLE -->
 <div class="table-responsive">
 
-<table class="table table-hover align-middle mb-0">
+<table class="table align-middle text-center mb-0">
 
-<thead style="background:#0b2a6e;color:white;">
+<thead style="background:#f1f5f9;">
 
-<tr>
+<tr style="font-size:18px; color:#000; font-weight:600;">
 
-<th class="ps-4 py-3">Product ID</th>
-
+<th>Product ID</th>
 <th>Name</th>
-
-<th>Blockchain Tx Hash</th>
-
-<th>Status</th>
-
-<th>Added Date</th>
-
-<th>QR Code</th>
-
-<th class="text-end pe-4">Actions</th>
+<th>Brand</th>
+<th>Transaction Hash</th>
+<th>Quantity</th>
+<th>Date</th>
+<th>Units</th>
+<th>Actions</th>
 
 </tr>
 
 </thead>
 
-
 <tbody id="productTable">
 
 {% for p in products %}
 
-<tr>
+<tr
+data-brand="{{ p.manufacturer_brand }}"
+data-date="{{ p.created_at_ist.strftime('%Y-%m-%d') if p.created_at_ist else '' }}"
+style="font-size:17px; font-weight:500;">
 
-<td class="ps-4 fw-semibold">
-
-{{ p.product_id }}
-
-</td>
-
-
+<td>{{ p.product_id }}</td>
+<td>{{ p.name }}</td>
 <td>
-
-{{ p.name }}
-
-</td>
-
-
-<td style="max-width:260px;word-break:break-word;font-size:14px;">
-
-{{ p.tx_hash }}
-
-</td>
-
-
-<td>
-
-<span class="badge bg-success px-3 py-2">
-
-<i class="fa-solid fa-check me-1"></i>
-Registered
-
+<span style="background:#111;color:white;padding:5px 12px;border-radius:6px;">
+{{ p.manufacturer_brand }}
 </span>
-
 </td>
 
+<td style="max-width:280px;word-break:break-word;">
+{{ p.tx_hash }}
+</td>
+
+<td>{{ p.quantity }}</td>
 
 <td>
-
-{{ p.created_at_ist.strftime("%d %b %Y %I:%M %p") }}
-
+{{ p.created_at_ist.strftime("%d %b %Y") if p.created_at_ist }}
 </td>
-
 
 <td>
-
-<img src="{{ url_for('static', filename=p.qr_code) }}"
-width="55"
-class="border rounded p-1 shadow-sm">
-
-</td>
-
-
-<td class="text-end pe-4">
-
-<a href="{{ url_for('static', filename=p.qr_code) }}"
-download
-class="btn btn-sm btn-outline-dark me-1">
-
-<i class="fa-solid fa-download"></i>
-
+<a href="/manufacturer/product-units/{{ p.product_id }}"
+class="btn btn-sm btn-primary">
+View Units
 </a>
+</td>
 
-
+<td>
 <a href="/manufacturer/product-logs/{{ p.product_id }}"
-class="btn btn-sm btn-outline-primary me-1">
+class="me-2">Logs</a>
 
-<i class="fa-solid fa-clock-rotate-left"></i>
-
-</a>
-
-
-<button
-class="btn btn-sm btn-outline-danger confirm-btn"
+<button class="btn btn-sm text-danger"
 data-url="/manufacturer/delete/{{ p.product_id }}"
 data-bs-toggle="modal"
 data-bs-target="#confirmModal">
-<i class="fa-solid fa-trash"></i>
+Delete
 </button>
+
+</td>
+
+</tr>
+
+{% else %}
+
+<tr>
+
+<td colspan="8"
+style="
+font-size:18px;
+color:#64748b;
+font-weight:500;
+text-align:center;
+padding:40px;
+">
+
+No products added yet
 
 </td>
 
@@ -244,45 +265,79 @@ data-bs-target="#confirmModal">
 
 </div>
 
-
-
-</div>
-</div>
 </div>
 
+</div>
 
+<!-- SEARCH SCRIPT -->
 
 <script>
 
-const searchInput = document.getElementById("searchInput")
-const statusFilter = document.getElementById("statusFilter")
+document.addEventListener("DOMContentLoaded", function(){
 
-searchInput.addEventListener("keyup", filterTable)
-statusFilter.addEventListener("change", filterTable)
+const searchInput = document.getElementById("searchInput");
+const brandFilter = document.getElementById("brandFilter");
+const dateFilter = document.getElementById("dateFilter");
 
-function filterTable(){
+function filterProducts(){
 
-let search = searchInput.value.toLowerCase()
-let status = statusFilter.value.toLowerCase()
+let search = searchInput.value.toLowerCase();
+let brand = brandFilter.value;
+let date = dateFilter.value;
 
-let rows = document.querySelectorAll("#productTable tr")
+let rows = document.querySelectorAll("#productTable tr");
 
 rows.forEach(row=>{
 
-let text = row.innerText.toLowerCase()
+let name = row.cells[1].innerText.toLowerCase();
+let brandName = row.cells[2].innerText.toLowerCase();
+let hash = row.cells[3].innerText.toLowerCase();
 
-let matchesSearch = text.includes(search)
-let matchesStatus = status=="" || text.includes(status)
+let rowBrand = row.dataset.brand;
+let rowDate = row.dataset.date;
 
-row.style.display =
-(matchesSearch && matchesStatus)
-? ""
-: "none"
+let matchSearch =
+name.includes(search) ||
+brandName.includes(search) ||
+hash.includes(search);
 
-})
+let matchBrand =
+!brand || rowBrand === brand;
+
+let matchDate = true;
+
+if(date){
+
+let today = new Date();
+let productDate = new Date(rowDate);
+
+let diffDays = (today - productDate) / (1000*60*60*24);
+
+if(date === "today")
+matchDate = diffDays < 1;
+
+else if(date === "week")
+matchDate = diffDays <= 7;
+
+else if(date === "month")
+matchDate = diffDays <= 30;
 
 }
 
-</script>
+row.style.display =
+(matchSearch && matchBrand && matchDate)
+? ""
+: "none";
 
+});
+
+}
+
+searchInput.addEventListener("keyup", filterProducts);
+brandFilter.addEventListener("change", filterProducts);
+dateFilter.addEventListener("change", filterProducts);
+
+});
+
+</script>
 {% endblock %}
